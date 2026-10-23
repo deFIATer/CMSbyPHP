@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             header("Location: menus.php?menu=" . $db->lastInsertId() . '&saved=1');
             exit;
         } catch (\PDOException $e) { 
-            $message = 'Menu slug is already in use.'; 
+            $message = __('Menu slug is already in use.'); 
             $messageType = 'danger';
         }
     }
@@ -169,7 +169,7 @@ require_once __DIR__ . '/views/header.php';
 .menu-node.depth-3 { margin-left: 108px; }
 
 .menu-item-card {
-    background: var(--bg-surface, #1e293b);
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm, 8px);
     padding: 10px 14px;
@@ -206,7 +206,7 @@ require_once __DIR__ . '/views/header.php';
 }
 .drag-handle:hover {
     color: var(--text-main);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-card-hover);
 }
 
 .depth-indicator-badge {
@@ -214,7 +214,7 @@ require_once __DIR__ . '/views/header.php';
     font-weight: 700;
     padding: 2px 7px;
     border-radius: 4px;
-    background: var(--bg-card, #111827);
+    background: var(--bg-subtle);
     color: var(--text-muted);
     border: 1px solid var(--border-subtle);
     font-family: monospace;
@@ -224,7 +224,7 @@ require_once __DIR__ . '/views/header.php';
 .item-actions-group {
     display: inline-flex;
     align-items: center;
-    background: var(--bg-card, #111827);
+    background: var(--bg-subtle);
     border: 1px solid var(--border-subtle);
     border-radius: 6px;
     padding: 2px;
@@ -246,7 +246,7 @@ require_once __DIR__ . '/views/header.php';
     transition: all 0.15s ease;
 }
 .action-icon-btn:hover {
-    background: rgba(255, 255, 255, 0.07);
+    background: var(--bg-card-hover);
     color: var(--text-main);
 }
 .action-icon-btn.primary-hover:hover {
@@ -271,7 +271,7 @@ require_once __DIR__ . '/views/header.php';
 </div>
 
 <?php if (isset($_GET['saved'])): ?>
-    <div class="card" style="border-left: 4px solid var(--success, #10b981); background: rgba(16, 185, 129, 0.08); padding: 12px 16px; margin-bottom: 20px; color: #34d399; font-weight: 500;">
+    <div class="card" style="border-left: 4px solid var(--success, #10b981); background: var(--success-subtle); padding: 12px 16px; margin-bottom: 20px; color: var(--success); font-weight: 500;">
         <?= _e('Menu structure updated successfully.') ?>
     </div>
 <?php elseif ($message): ?>
@@ -366,7 +366,7 @@ require_once __DIR__ . '/views/header.php';
             </form>
         </div>
 
-        <div class="card" style="padding: 14px 16px; background: var(--bg-surface, #1e293b); border: 1px solid var(--border-subtle); font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+        <div class="card" style="padding: 14px 16px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); font-size: 12px; color: var(--text-muted); line-height: 1.5;">
             <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">💡 <?= _e('Drag & Drop Tips:') ?></strong>
             <?= _e('Drag an item up or down to reorder. Use the indent buttons or drag slightly right to nest items as sub-menus.') ?>
         </div>
@@ -379,10 +379,10 @@ require_once __DIR__ . '/views/header.php';
             <input type="hidden" name="csrf_token" value="<?= Security::generateCsrfToken() ?>">
 
             <div class="card" style="padding: 0; overflow: hidden; border: 1px solid var(--border-subtle);">
-                <div style="padding: 16px 20px; background: var(--bg-surface, #1e293b); border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="padding: 16px 20px; background: var(--table-header-bg); border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <span style="font-weight: 700; font-size: 15px; color: var(--text-main);"><?= Security::sanitize($currentMenu['name']) ?></span>
-                        <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">Theme Tag: <code style="background: var(--bg-card, #0b0f19); border: 1px solid var(--border-subtle); color: var(--accent, #60a5fa); padding: 2px 6px; border-radius: 4px;">menu('<?= Security::sanitize($currentMenu['slug']) ?>');</code></span>
+                        <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">Theme Tag: <code style="background: var(--bg-subtle); border: 1px solid var(--border-subtle); color: var(--accent, #60a5fa); padding: 2px 6px; border-radius: 4px;">menu('<?= Security::sanitize($currentMenu['slug']) ?>');</code></span>
                     </div>
                     <?php if (!empty($tree)): ?>
                         <button type="submit" class="btn btn-primary" style="padding: 7px 16px; font-size: 13px;">
@@ -479,7 +479,7 @@ require_once __DIR__ . '/views/header.php';
                 </div>
 
                 <?php if (!empty($tree)): ?>
-                    <div style="padding: 14px 20px; background: var(--bg-surface, #1e293b); border-top: 1px solid var(--border-subtle); text-align: right;">
+                    <div style="padding: 14px 20px; background: var(--bg-surface); border-top: 1px solid var(--border-subtle); text-align: right;">
                         <button type="submit" class="btn btn-primary" style="padding: 8px 20px;"><?= _e('Save Menu Structure') ?></button>
                     </div>
                 <?php endif; ?>

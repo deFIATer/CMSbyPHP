@@ -19,8 +19,8 @@ final class Setup {
     /** Version of the shipped .htaccess rule set (matches the marker line). */
     public const VERSION = '3';
 
-    /** Marker that identifies a file as managed by ModoCMS. */
-    public const MARKER_PATTERN = '/#\s*ModoCMS\s+\.htaccess\s+v([0-9]+(?:\.[0-9]+)?)/i';
+    /** Marker that identifies a file as managed by CMSbyPHP. */
+    public const MARKER_PATTERN = '/#\s*(CMSbyPHP|ModoCMS)\s+\.htaccess\s+v([0-9]+(?:\.[0-9]+)?)/i';
 
     /** Directory roots that are never allowed to be served directly. */
     public const DENIED_DIRECTORIES = ['data', 'languages', 'core', 'uploads/cache'];
@@ -305,7 +305,7 @@ final class Setup {
                 case 'unmanaged':
                     if (!$force) {
                         $result['status'] = 'skipped';
-                        $result['message'] = 'Existing file is not managed by ModoCMS and was left untouched. Tick "Replace custom files" to overwrite it (a backup is created first).';
+                        $result['message'] = 'Existing file is not managed by CMSbyPHP and was left untouched. Tick "Replace custom files" to overwrite it (a backup is created first).';
                         $results[] = $result;
                         continue 2;
                     }
@@ -379,7 +379,7 @@ final class Setup {
             'ok'       => version_compare(PHP_VERSION, '8.0.0', '>='),
             'severity' => 'error',
             'kind'     => 'requirement',
-            'hint'     => 'ModoCMS requires PHP 8.0 or newer (8.2+ recommended).',
+            'hint'     => 'CMSbyPHP requires PHP 8.0 or newer (8.2+ recommended).',
         ];
 
         $requiredExtensions = [
@@ -511,8 +511,8 @@ final class Setup {
                 'severity' => $severity,
                 'kind'     => $ok ? 'info' : 'requirement',
                 'hint'     => $ok ? '' : match ($failingValue) {
-                    'empty' => 'PHP falls back to UTC. Set a timezone in php.ini or through modoconfig.php ("timezone").',
-                    'on'    => 'Errors are printed to visitors. Turn display_errors off and use modoconfig.php ("debug_log") to keep them in data/logs/error.log.',
+                    'empty' => 'PHP falls back to UTC. Set a timezone in php.ini or through cmsbyphpconfig.php ("timezone").',
+                    'on'    => 'Errors are printed to visitors. Turn display_errors off and use cmsbyphpconfig.php ("debug_log") to keep them in data/logs/error.log.',
                     'off'   => 'Outgoing HTTP requests used by some plugins will fail.',
                     default => '',
                 },
@@ -531,7 +531,7 @@ final class Setup {
         $root = self::rootPath();
 
         $directories = [
-            ['id' => 'root', 'path' => $root, 'label' => 'Project root', 'purpose' => 'Root .htaccess, robots.txt, sitemap.xml and modoconfig.php.', 'severity' => 'error'],
+            ['id' => 'root', 'path' => $root, 'label' => 'Project root', 'purpose' => 'Root .htaccess, robots.txt, sitemap.xml and cmsbyphpconfig.php.', 'severity' => 'error'],
             ['id' => 'data', 'path' => $root . '/data', 'label' => 'data/', 'purpose' => 'SQLite database with all content and settings.', 'severity' => 'error'],
             ['id' => 'data_backups', 'path' => $root . '/data/backups', 'label' => 'data/backups/', 'purpose' => 'Backups created before every update.', 'severity' => 'warning'],
             ['id' => 'data_cache', 'path' => $root . '/data/cache', 'label' => 'data/cache/', 'purpose' => 'Full page cache (created automatically).', 'severity' => 'warning'],
@@ -636,7 +636,7 @@ final class Setup {
     public static function webServerRules(): string {
         return <<<'NGINX'
 # ---------------------------------------------------------------------------
-# ModoCMS - nginx equivalent of the shipped .htaccess rules
+# ModoCMS / CMSbyPHP - nginx equivalent of the shipped .htaccess rules
 # Paste this inside the "server { ... }" block of your site and adjust the
 # fastcgi_pass socket to your PHP-FPM version.
 # ---------------------------------------------------------------------------
@@ -647,6 +647,7 @@ location ~ ^/uploads/cache/         { deny all; }
 location ~ /\.(?!well-known)        { deny all; }
 location ~* \.(sqlite3?|db|sql|log|ini|lock|bak|orig|old|dist)$ { deny all; }
 location ~ ^/uploads/.*\.(php|phtml|php[0-9]|phps|pht|phar|cgi|pl|py|sh|shtml)$ { deny all; }
+location = /cmsbyphpconfig.php       { deny all; }
 location = /modoconfig.php          { deny all; }
 location = /composer.lock           { deny all; }
 

@@ -2,7 +2,7 @@
 
 **Polski** | [English](../en/examples.md)
 
-Gotowe do skopiowania przykłady rozbudowy Modo CMS. Każdy to kompletny plik pluginu — wrzuć go do `plugins/`, aktywuj w **Wtyczki** i działa.
+Gotowe do skopiowania przykłady rozbudowy CMSbyPHP. Każdy to kompletny plik pluginu — wrzuć go do `plugins/`, aktywuj w **Wtyczki** i działa.
 
 > Wszystkie przykłady zaczynają się od `declare(strict_types=1);` i nie używają zewnętrznych CDN, zgodnie z konwencjami projektu.
 
@@ -28,7 +28,7 @@ Hooks::addFilter('the_content', function (string $content): string {
     if (defined('IN_ADMIN') && IN_ADMIN === true) {
         return $content;
     }
-    return $content . '<p style="color:#64748b;font-style:italic;">Powered by Modo CMS</p>';
+    return $content . '<p style="color:#64748b;font-style:italic;">Powered by CMSbyPHP</p>';
 });
 ```
 

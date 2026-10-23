@@ -91,7 +91,7 @@ final class PageCache
 
         if (is_file($file) && (time() - (int)filemtime($file)) < self::ttl()) {
             if (!headers_sent()) {
-                header('X-Modo-Cache: HIT');
+                header('X-CMSbyPHP-Cache: HIT');
                 header('Cache-Control: public, max-age=' . self::ttl());
             }
             readfile($file);

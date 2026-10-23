@@ -1,6 +1,6 @@
-# ModoCMS .htaccess v3 - do not remove this line
+# CMSbyPHP .htaccess v3 - do not remove this line
 #
-# Apache / LiteSpeed rules for ModoCMS.
+# Apache / LiteSpeed rules for CMSbyPHP.
 # The same file works in the document root (https://domain/) and inside a
 # subfolder (https://domain/subfolder/): RewriteBase is intentionally NOT set,
 # Apache derives the base path from the directory holding this file.
@@ -40,7 +40,7 @@ DirectoryIndex index.php
 # 3. Block sensitive files: databases, logs, backups, configuration and
 #    version-control / editor leftovers
 # ---------------------------------------------------------------------------
-<FilesMatch "(^\..*|\.sqlite.*|\.(sqlite3|db|sql|log|ini|json|lock|bak|orig|old|dist)$|^(modoconfig\.php|modoconfig\.sample\.php|composer\.json|composer\.lock|phpunit\.xml|php\.ini)$)">
+<FilesMatch "(^\..*|\.sqlite.*|\.(sqlite3|db|sql|log|ini|json|lock|bak|orig|old|dist)$|^(cmsbyphpconfig\.php|cmsbyphpconfig\.sample\.php|modoconfig\.php|modoconfig\.sample\.php|composer\.json|composer\.lock|phpunit\.xml|php\.ini)$)">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>

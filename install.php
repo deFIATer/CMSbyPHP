@@ -40,7 +40,7 @@ if ($alreadyInstalled) {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ModoCMS &bull; Already Installed</title>
+        <title>CMSbyPHP &bull; Already Installed</title>
         <link rel="stylesheet" href="admin/assets/css/admin.css">
         <style>
             :root {
@@ -124,7 +124,7 @@ if ($alreadyInstalled) {
     <body>
         <div class="notice-card">
             <div class="brand-badge">M</div>
-            <h2>ModoCMS is already installed</h2>
+            <h2>CMSbyPHP is already installed</h2>
             <p>Your website is already configured and running.</p>
             <div class="warning-box">
                 <strong>Security recommendation:</strong><br>
@@ -159,7 +159,7 @@ if (is_dir($langDir)) {
 if (empty($availableLangs)) {
     $availableLangs['en'] = 'English';
     $translations['en'] = [
-        'setup_title' => 'ModoCMS Setup',
+        'setup_title' => 'CMSbyPHP Setup',
         'setup_desc' => 'Configure your lightweight instance',
         'site_title' => 'Site Title',
         'default_site_title' => 'My Website',
@@ -171,9 +171,9 @@ if (empty($availableLangs)) {
         'complete_install' => 'Complete Installation',
         'fill_all_fields' => 'Please fill all required fields. Password must be at least 6 characters.',
         'welcome_page_title' => 'Welcome to your new website',
-        'welcome_page_content' => '<p>ModoCMS has been successfully installed and configured.</p>',
+        'welcome_page_content' => '<p>CMSbyPHP has been successfully installed and configured.</p>',
         'first_post_title' => 'First Post',
-        'first_post_content' => '<p>This is your first article published using ModoCMS.</p>',
+        'first_post_content' => '<p>This is your first article published using CMSbyPHP.</p>',
         'main_menu' => 'Main Menu',
         'home' => 'Home',
         'blog' => 'Blog'
@@ -521,9 +521,9 @@ HTACCESS;
 
             // Seed initial localized content using distinct prepared statements in a transaction
             $welcomeTitle = $t['welcome_page_title'] ?? 'Welcome to your new website';
-            $welcomeContent = $t['welcome_page_content'] ?? '<p>ModoCMS has been successfully installed and configured.</p>';
+            $welcomeContent = $t['welcome_page_content'] ?? '<p>CMSbyPHP has been successfully installed and configured.</p>';
             $firstPostTitle = $t['first_post_title'] ?? 'First Post';
-            $firstPostContent = $t['first_post_content'] ?? '<p>This is your first article published using ModoCMS.</p>';
+            $firstPostContent = $t['first_post_content'] ?? '<p>This is your first article published using CMSbyPHP.</p>';
             $mainMenuName = $t['main_menu'] ?? 'Main Menu';
             $homeLabel = $t['home'] ?? 'Home';
             $blogLabel = $t['blog'] ?? 'Blog';
@@ -611,7 +611,7 @@ $curT = $translations[$initialLocale] ?? reset($translations);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ModoCMS &bull; Installation</title>
+    <title>CMSbyPHP &bull; Installation</title>
     <link rel="stylesheet" href="admin/assets/css/admin.css">
     <style>
         :root {
@@ -778,7 +778,7 @@ $curT = $translations[$initialLocale] ?? reset($translations);
         <div class="header-area">
             <div class="brand-badge">M</div>
             <div>
-                <h1 class="header-title" data-i18n="setup_title"><?= htmlspecialchars($curT['setup_title'] ?? 'ModoCMS Setup') ?></h1>
+                <h1 class="header-title" data-i18n="setup_title"><?= htmlspecialchars($curT['setup_title'] ?? 'CMSbyPHP Setup') ?></h1>
                 <p class="header-desc" data-i18n="setup_desc"><?= htmlspecialchars($curT['setup_desc'] ?? 'Configure your lightweight instance') ?></p>
             </div>
         </div>

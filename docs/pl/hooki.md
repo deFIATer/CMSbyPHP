@@ -2,7 +2,7 @@
 
 **Polski** | [English](../en/hooks.md)
 
-**Hook** to nazwany punkt w kodzie, w który mogą wpinać się pluginy. Modo CMS ma dwa rodzaje:
+**Hook** to nazwany punkt w kodzie, w który mogą wpinać się pluginy. CMSbyPHP ma dwa rodzaje:
 
 * **Akcje** — coś się dzieje; Twoja funkcja działa dla efektu ubocznego. Subskrybuj przez `Hooks::addAction($hook, $callback, $priority = 10)`.
 * **Filtry** — powstaje wartość; Twoja funkcja ją dostaje i **zwraca** (ewentualnie zmienioną). Subskrybuj przez `Hooks::addFilter($filter, $callback, $priority = 10)`.
@@ -123,7 +123,7 @@ Inny kod subskrybuje wtedy przez `addAction('myplugin_after_save', …)` / `addF
 
 Jeśli piszesz w stylu GetSimple, `add_action()` / `add_filter()` tłumaczą klasyczne nazwy na powyższe hooki. Pełne mapowanie jest w [Wtyczki w stylu GetSimple](wtyczki.md#5-akcje-i-filtry). Kluczowe mapowania:
 
-| Nazwa GetSimple | Hook Modo |
+| Nazwa GetSimple | Hook CMSbyPHP |
 |---|---|
 | `theme-header` | `theme_head` |
 | `theme-footer` | `theme_footer` |

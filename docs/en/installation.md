@@ -2,7 +2,7 @@
 
 [Polski](../pl/instalacja.md) | **English**
 
-This guide walks you through installing Modo CMS, from requirements to a working site. It works both in the **domain root** and in a **subdirectory**.
+This guide walks you through installing CMSbyPHP, from requirements to a working site. It works both in the **domain root** and in a **subdirectory**.
 
 ---
 
@@ -82,7 +82,7 @@ After installation:
 
 ### Apache
 
-Modo CMS ships with an `.htaccess` file that rewrites all traffic to `index.php`. Make sure overrides are allowed and the required modules are enabled.
+CMSbyPHP ships with an `.htaccess` file that rewrites all traffic to `index.php`. Make sure overrides are allowed and the required modules are enabled.
 
 ```apache
 <Directory /var/www/html>
@@ -162,7 +162,7 @@ The built-in server does not read `.htaccess`. For clean URLs use Apache/Nginx, 
 
 ## Next steps
 
-* [Creating plugins (native Modo)](plugins.md)
+* [Creating plugins (native CMSbyPHP)](plugins.md)
 * [Creating GetSimple-style plugins](getsimple-plugins.md)
 * [Theme functions reference](theme-functions.md)
 * [Hooks reference](hooks.md)

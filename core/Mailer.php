@@ -9,12 +9,12 @@ use PHPMailer\PHPMailer\Exception as PHPMailerException;
 /**
  * Class Mailer
  *
- * Central outbound e-mail dispatcher for Modo CMS. The transport is chosen in
+ * Central outbound e-mail dispatcher for CMSbyPHP. The transport is chosen in
  * System Settings → Email:
  *   - "mail"  : uses the PHP mail() function.
  *   - "smtp"  : sends through the bundled PHPMailer library over SMTP.
  *
- * Plugins (e.g. Modo Form) should route every outgoing message through this
+ * Plugins (e.g. contact form plugins) should route every outgoing message through this
  * class so the same configuration and sender identity are respected site-wide.
  */
 final class Mailer

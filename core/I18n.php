@@ -100,6 +100,10 @@ namespace Core {
             return self::$frontendLang;
         }
 
+        public static function getFrontendLocale(): string {
+            return self::$frontendLang;
+        }
+
         public static function setLocale(string $lang): void {
             if (array_key_exists($lang, self::$availableLanguages)) {
                 self::$frontendLang = $lang;

@@ -211,6 +211,9 @@ final class Database {
                 mime_type TEXT NOT NULL,
                 file_size INTEGER NOT NULL,
                 webp_path TEXT,
+                is_private INTEGER DEFAULT 0,
+                password_hash TEXT,
+                access_token TEXT,
                 user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
@@ -257,8 +260,8 @@ final class Database {
 
         // Seed configuration settings
         $defaultSettings = [
-            'site_title' => 'Modo CMS',
-            'site_description' => 'Lightweight, modern SQLite3 powered CMS',
+            'site_title' => 'CMSbyPHP',
+            'site_description' => 'Lightweight, modern SQLite3 powered blog and CMS',
             'site_url' => '',
             'active_theme' => 'default',
             'posts_per_page' => '6',
@@ -302,7 +305,7 @@ final class Database {
         // Demo content: English
         $db->exec("
             INSERT OR IGNORE INTO pages (id, parent_id, slug, title, content, type, status, lang, translation_group, author_id)
-            VALUES (1, 0, 'home', 'Welcome to Modo CMS', '<p>Welcome to your fast, modular and secure CMS powered by SQLite3.</p>', 'page', 'published', 'en', 'home-group', 1);
+            VALUES (1, 0, 'home', 'Welcome to CMSbyPHP', '<p>Welcome to your fast, modular and secure blog powered by SQLite3.</p>', 'page', 'published', 'en', 'home-group', 1);
 
             INSERT OR IGNORE INTO pages (id, parent_id, slug, title, content, type, status, lang, translation_group, author_id)
             VALUES (2, 0, 'first-post', 'First Blog Post', '<p>This is your first blog post generated inside the articles loop.</p>', 'post', 'published', 'en', 'first-post-group', 1);
@@ -311,7 +314,7 @@ final class Database {
         // Demo content: Polish translation
         $db->exec("
             INSERT OR IGNORE INTO pages (id, parent_id, slug, title, content, type, status, lang, translation_group, author_id)
-            VALUES (3, 0, 'home', 'Witaj w Modo CMS', '<p>Witamy w szybkim, modułowym i bezpiecznym systemie CMS opartym o SQLite3.</p>', 'page', 'published', 'pl', 'home-group', 1);
+            VALUES (3, 0, 'home', 'Witaj w CMSbyPHP', '<p>Witamy w szybkim, modułowym i bezpiecznym systemie CMS opartym o SQLite3.</p>', 'page', 'published', 'pl', 'home-group', 1);
 
             INSERT OR IGNORE INTO pages (id, parent_id, slug, title, content, type, status, lang, translation_group, author_id)
             VALUES (4, 0, 'pierwszy-artykul', 'Pierwszy artykuł na blogu', '<p>To jest Twój pierwszy wpis wygenerowany w pętli artykułów.</p>', 'post', 'published', 'pl', 'first-post-group', 1);
@@ -339,6 +342,18 @@ final class Database {
     private static function ensureSchemaAdditions(PDO $db): void
     {
         try {
+            // Media table private / password-protection support
+            $mediaCols = $db->query("PRAGMA table_info(media)")->fetchAll(PDO::FETCH_COLUMN, 1);
+            if (!in_array('is_private', $mediaCols, true)) {
+                $db->exec("ALTER TABLE media ADD COLUMN is_private INTEGER DEFAULT 0");
+            }
+            if (!in_array('password_hash', $mediaCols, true)) {
+                $db->exec("ALTER TABLE media ADD COLUMN password_hash TEXT DEFAULT NULL");
+            }
+            if (!in_array('access_token', $mediaCols, true)) {
+                $db->exec("ALTER TABLE media ADD COLUMN access_token TEXT DEFAULT NULL");
+            }
+
             $db->exec("
                 CREATE TABLE IF NOT EXISTS customize_schema (
                     theme TEXT PRIMARY KEY,

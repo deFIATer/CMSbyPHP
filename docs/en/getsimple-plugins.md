@@ -2,7 +2,7 @@
 
 [Polski](../pl/wtyczki.md) | **English**
 
-Modo CMS ships with a **GetSimple compatibility layer** (`core/GetSimpleCompat.php`). It lets plugins written for **GetSimple CMS** run on Modo with little or no changes, and it also provides handy global helpers (`register_plugin`, `createSideMenu`, `i18n_merge`) that native plugins use too.
+CMSbyPHP ships with a **GetSimple compatibility layer** (`core/GetSimpleCompat.php`). It lets plugins written for **GetSimple CMS** run on CMSbyPHP with little or no changes, and it also provides handy global helpers (`register_plugin`, `createSideMenu`, `i18n_merge`) that native plugins use too.
 
 Use this style when you are **porting an existing GetSimple plugin** or when you prefer the classic procedural API. For all-new plugins, the [native hook style](plugins.md) is recommended.
 
@@ -25,7 +25,7 @@ All of these are defined globally (no namespace), so a GetSimple plugin can call
 
 ## 2. Environment constants
 
-| Constant | Meaning on Modo |
+| Constant | Meaning on CMSbyPHP |
 |---|---|
 | `IN_GS` | `true` — makes GetSimple plugins believe they run inside GetSimple. |
 | `GSVERSION` | Reported as `3.3.16`. |
@@ -105,7 +105,7 @@ render_admin_sidebar_icon();                  // default icon
 
 ## 5. Actions and filters
 
-The compatibility layer maps GetSimple hook names onto Modo's hooks.
+The compatibility layer maps GetSimple hook names onto CMSbyPHP's hooks.
 
 ### `add_action( $hook, $function, $args = [] )`
 
@@ -113,7 +113,7 @@ The compatibility layer maps GetSimple hook names onto Modo's hooks.
 add_action('theme-footer', 'my_plugin_footer');
 ```
 
-| GetSimple hook | Mapped to (Modo) |
+| GetSimple hook | Mapped to (CMSbyPHP) |
 |---|---|
 | `theme-header` | `theme_head` |
 | `theme-footer` | `theme_footer` |
@@ -137,14 +137,14 @@ function my_plugin_filter_content($content) {
 }
 ```
 
-| GetSimple filter | Mapped to (Modo) |
+| GetSimple filter | Mapped to (CMSbyPHP) |
 |---|---|
 | `content` | `the_content` |
 | `title` | `the_title` |
 | `excerpt` | `the_excerpt` |
 | *anything else* | same name (passed through) |
 
-> ⚠️ GetSimple's filter signature is `function($value)` — one argument. The compatibility wrapper passes only the value; extra arguments a Modo filter might provide are not forwarded through this helper. If you need them, subscribe with `Hooks::addFilter()` directly (see [native plugins](plugins.md)).
+> ⚠️ GetSimple's filter signature is `function($value)` — one argument. The compatibility wrapper passes only the value; extra arguments a CMSbyPHP filter might provide are not forwarded through this helper. If you need them, subscribe with `Hooks::addFilter()` directly (see [native plugins](plugins.md)).
 
 ### `exec_action()` / `exec_filter()`
 
@@ -192,7 +192,7 @@ echo i18n_r('my-gs-plugin/MYPLUGIN_TITLE');  // returns the string
 i18n('my-gs-plugin/MYPLUGIN_TITLE');         // echoes it, HTML-escaped
 ```
 
-`i18n_r()` first looks in the registry, then strips the prefix and falls back to Modo's own `__()` translation.
+`i18n_r()` first looks in the registry, then strips the prefix and falls back to CMSbyPHP's own `__()` translation.
 
 ---
 
@@ -228,7 +228,7 @@ These exist for compatibility with plugins that store data as XML (a common GetS
 <?php
 /**
  * Plugin Name: My GS Plugin
- * Description: A GetSimple-style plugin for Modo CMS.
+ * Description: A GetSimple-style plugin for CMSbyPHP.
  * Version: 1.0.0
  * Author: Your Name
  *

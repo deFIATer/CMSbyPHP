@@ -25,13 +25,63 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_FILES['file'])) {
 }
 
 $file = $_FILES['file'];
-$allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
-$maxSize = 8 * 1024 * 1024; // 8MB
+
+// Allowed file types (Images, Videos, Audio, Documents, Archives)
+$allowedMimes = [
+    // Images
+    'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/x-icon',
+    // Videos
+    'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime',
+    // Audio
+    'audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/ogg', 'audio/webm',
+    // Documents & Text
+    'application/pdf', 'text/plain',
+    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    // Archives
+    'application/zip', 'application/x-zip-compressed', 'application/x-tar', 'application/gzip'
+];
+
+// Helper to convert php.ini size strings (e.g. "64M") to bytes
+$parseIniBytes = function (string $val): int {
+    $val = trim($val);
+    $last = strtolower($val[strlen($val) - 1] ?? '');
+    $num = (int)$val;
+    return match ($last) {
+        'g' => $num * 1024 * 1024 * 1024,
+        'm' => $num * 1024 * 1024,
+        'k' => $num * 1024,
+        default => $num,
+    };
+};
+
+$iniUploadMax = $parseIniBytes(ini_get('upload_max_filesize') ?: '32M');
+$iniPostMax = $parseIniBytes(ini_get('post_max_size') ?: '32M');
+$maxSize = min($iniUploadMax, $iniPostMax);
+$cfgMax = (int) (\Core\Config::get('upload_max_size') ?? 0);
+if ($cfgMax > 0) {
+    $maxSize = min($maxSize, $cfgMax * 1024 * 1024);
+}
+if ($maxSize < 1024 * 1024) {
+    $maxSize = 32 * 1024 * 1024; // Fallback to 32MB
+}
 
 // Validate upload status and file size
 if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > $maxSize) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid file size or upload failure']);
+    $limitMb = round($maxSize / (1024 * 1024), 1);
+    $errMsg = match ($file['error']) {
+        UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => "Plik przekracza maksymalny dopuszczalny rozmiar ({$limitMb} MB).",
+        UPLOAD_ERR_PARTIAL => 'Przesyłanie pliku zostało przerwane.',
+        UPLOAD_ERR_NO_FILE => 'Nie przesłano żadnego pliku.',
+        UPLOAD_ERR_NO_TMP_DIR => 'Brak katalogu tymczasowego na serwerze.',
+        UPLOAD_ERR_CANT_WRITE => 'Nie udało się zapisać pliku na dysku serwera.',
+        default => ($file['size'] > $maxSize)
+            ? "Plik przekracza maksymalny dopuszczalny rozmiar ({$limitMb} MB)."
+            : 'Wystąpił błąd podczas przesyłania pliku (kod ' . $file['error'] . ').',
+    };
+    echo json_encode(['error' => $errMsg]);
     exit;
 }
 
@@ -39,9 +89,20 @@ if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > $maxSize) {
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 $mime = $finfo->file($file['tmp_name']);
 
+// Extension fallback for certain containers
+$origExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+if ($mime === 'application/octet-stream' || $mime === 'video/mp4') {
+    if ($origExt === 'mp4') $mime = 'video/mp4';
+    elseif ($origExt === 'webm') $mime = 'video/webm';
+    elseif ($origExt === 'mov') $mime = 'video/quicktime';
+    elseif ($origExt === 'mp3') $mime = 'audio/mpeg';
+    elseif ($origExt === 'pdf') $mime = 'application/pdf';
+    elseif ($origExt === 'zip') $mime = 'application/zip';
+}
+
 if (!in_array($mime, $allowedMimes, true)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Disallowed format. Allowed: JPG, PNG, WEBP, GIF, SVG']);
+    echo json_encode(['error' => 'Disallowed format (' . htmlspecialchars($mime) . '). Allowed: JPG, PNG, WEBP, GIF, SVG, MP4, WEBM, MOV, MP3, WAV, PDF, DOCX, ZIP']);
     exit;
 }
 
@@ -61,50 +122,89 @@ $extMap = [
     'image/png'     => 'png',
     'image/webp'    => 'webp',
     'image/gif'     => 'gif',
-    'image/svg+xml' => 'svg'
+    'image/svg+xml' => 'svg',
+    'image/x-icon'  => 'ico',
+    'video/mp4'     => 'mp4',
+    'video/webm'    => 'webm',
+    'video/quicktime'=> 'mov',
+    'video/ogg'     => 'ogv',
+    'audio/mpeg'    => 'mp3',
+    'audio/wav'     => 'wav',
+    'audio/x-wav'   => 'wav',
+    'audio/ogg'     => 'ogg',
+    'audio/webm'    => 'weba',
+    'application/pdf'=> 'pdf',
+    'text/plain'    => 'txt',
+    'application/msword' => 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+    'application/vnd.ms-excel' => 'xls',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+    'application/vnd.ms-powerpoint' => 'ppt',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
+    'application/zip' => 'zip',
+    'application/x-zip-compressed' => 'zip',
+    'application/x-tar' => 'tar',
+    'application/gzip' => 'gz'
 ];
-$ext = $extMap[$mime] ?? 'bin';
+$ext = $extMap[$mime] ?? ($origExt ?: 'bin');
 $safeName = bin2hex(random_bytes(16)) . '.' . $ext;
 
-$uploadDir = __DIR__ . '/../uploads/';
+$isPrivateUpload = !empty($_POST['is_private']) && $_POST['is_private'] === '1' && !empty($_POST['password']);
+$uploadPassword = $isPrivateUpload ? trim((string)$_POST['password']) : null;
+
+$uploadDir = $isPrivateUpload ? \Core\ProtectedMedia::getProtectedDir() . '/' : __DIR__ . '/../uploads/';
 if (!is_dir($uploadDir)) {
     @mkdir($uploadDir, 0775, true);
 }
 
 if (move_uploaded_file($file['tmp_name'], $uploadDir . $safeName)) {
-    // Dynamically resolve base subdirectory (e.g. /cleancms) for public URL
     $basePrefix = class_exists('Core\Router') ? Router::getBaseSubdirectory() : '';
-    $publicUrl = $basePrefix . '/uploads/' . $safeName;
-    $storagePath = '/uploads/' . $safeName;
 
-    // Automatic WebP conversion (Settings → Media & Images).
     $webpPath = null;
-    if (\Core\ImageOptimizer::isEnabled() && \Core\ImageOptimizer::isSupported()) {
+    if (!$isPrivateUpload && str_starts_with($mime, 'image/') && \Core\ImageOptimizer::isEnabled() && \Core\ImageOptimizer::isSupported()) {
         $converted = \Core\ImageOptimizer::convertToWebp($uploadDir . $safeName);
         if ($converted !== null) {
             $webpPath = '/uploads/' . basename($converted);
         }
     }
 
+    $storagePath = $isPrivateUpload ? ('/' . \Core\ProtectedMedia::PROTECTED_DIR . '/' . $safeName) : ('/uploads/' . $safeName);
+    $passwordHash = $isPrivateUpload ? password_hash($uploadPassword, PASSWORD_DEFAULT) : null;
+    $accessToken = $isPrivateUpload ? bin2hex(random_bytes(16)) : null;
+
     // Record media entry in database
     $db = Database::getConnection();
     $stmt = $db->prepare("
-        INSERT INTO media (filename, filepath, mime_type, file_size, webp_path, user_id) 
-        VALUES (:f, :p, :m, :s, :w, :u)
+        INSERT INTO media (filename, filepath, mime_type, file_size, webp_path, is_private, password_hash, access_token, user_id) 
+        VALUES (:f, :p, :m, :s, :w, :ip, :ph, :at, :u)
     ");
     $stmt->execute([
-        ':f' => basename($file['name']),
-        ':p' => $storagePath,
-        ':m' => $mime,
-        ':s' => $file['size'],
-        ':w' => $webpPath,
-        ':u' => Auth::id()
+        ':f'  => basename($file['name']),
+        ':p'  => $storagePath,
+        ':m'  => $mime,
+        ':s'  => $file['size'],
+        ':w'  => $webpPath,
+        ':ip' => $isPrivateUpload ? 1 : 0,
+        ':ph' => $passwordHash,
+        ':at' => $accessToken,
+        ':u'  => Auth::id()
     ]);
 
-    // Return URL compatible with TinyMCE and file pickers
+    $newId = (int)$db->lastInsertId();
+    $mediaRecord = [
+        'id' => $newId,
+        'filename' => basename($file['name']),
+        'filepath' => $storagePath,
+        'is_private' => $isPrivateUpload ? 1 : 0
+    ];
+
+    $publicUrl = \Core\ProtectedMedia::getAccessUrl($mediaRecord);
+
     echo json_encode([
+        'id'       => $newId,
         'location' => $publicUrl,
-        'url'      => $publicUrl
+        'url'      => $publicUrl,
+        'is_private' => $isPrivateUpload ? 1 : 0
     ]);
     exit;
 }

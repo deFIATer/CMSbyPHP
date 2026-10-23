@@ -1,6 +1,6 @@
-# Modo Bootstrap Light (`default`) — motyw Modo CMS
+# CMSbyPHP Bootstrap Light (`default`) — motyw CMSbyPHP
 
-Responsywny motyw dla Modo CMS oparty na **Bootstrap 5.3.8** + **Bootstrap Icons**.
+Responsywny motyw dla CMSbyPHP oparty na **Bootstrap 5.3.8** + **Bootstrap Icons**.
 
 ## Instalacja
 1. Folder `default/` znajduje się w `themes/`.

@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Wysłanie wiadomości e-mail (jeśli e-mail istnieje w bazie)
                 $userEmail = $foundUser['email'] ?? null;
                 if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
-                    $subject = "=?UTF-8?B?" . base64_encode(__('Modo CMS - Password Reset Request')) . "?=";
+                    $subject = "=?UTF-8?B?" . base64_encode(__('CMSbyPHP - Password Reset Request')) . "?=";
                     $body = sprintf(
                         __("Hello %s,\n\nA password reset request was made for your account.\nClick the link below to set a new password:\n\n%s\n\nThis link is valid for 1 hour.\nIf you did not request this, you can safely ignore this email."),
                         $foundUser['username'],
@@ -106,40 +106,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= _e('Reset Password - Modo CMS') ?></title>
+    <title><?= _e('Reset Password') ?> &bull; CMSbyPHP</title>
+
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('cmsbyphp_theme') || localStorage.getItem('clean_cms_theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
     <link rel="stylesheet" href="assets/css/admin.css">
     <style>
-        body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background-color: #0b0f19; margin: 0; font-family: system-ui, -apple-system, sans-serif; }
-        .login-card { width: 100%; max-width: 380px; padding: 36px; background: #fff; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
+        body { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            background: var(--bg-main); 
+            color: var(--text-main);
+            margin: 0; 
+            font-family: system-ui, -apple-system, sans-serif; 
+            padding: 20px;
+        }
+        .login-card { 
+            width: 100%; 
+            max-width: 400px; 
+            padding: 36px 32px; 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-subtle); 
+            border-radius: 16px; 
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15); 
+            color: var(--text-main);
+        }
+        @media (max-width: 480px) {
+            body { padding: 12px; }
+            .login-card { padding: 24px 18px; border-radius: 14px; }
+        }
         .form-group { margin-bottom: 16px; }
         .back-link { display: inline-block; font-size: 13px; color: var(--text-muted); text-decoration: none; margin-top: 16px; text-align: center; width: 100%; }
-        .back-link:hover { color: var(--text-main); text-decoration: underline; }
+        .back-link:hover { color: var(--primary); text-decoration: underline; }
     </style>
 </head>
 <body>
     <div class="login-card">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
-            <div class="brand-badge" style="width: 38px; height: 38px; font-size: 18px;">M</div>
-            <div>
-                <h1 style="font-size: 17px; font-weight: 700; color: var(--text-main); margin: 0;">Modo CMS</h1>
-                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
-                    <?= $step === 'reset' ? _e('Set a new password') : _e('Password recovery') ?>
-                </p>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img src="assets/img/cmsbyphp-icon-64.png" alt="CMSbyPHP" style="width: 40px; height: 40px; border-radius: 12px; object-fit: contain; flex-shrink: 0;">
+                <div>
+                    <h1 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0;">CMSbyPHP</h1>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+                        <?= $step === 'reset' ? _e('Set a new password') : _e('Password recovery') ?>
+                    </p>
+                </div>
             </div>
+            <button type="button" id="theme-toggle" class="theme-toggle-btn" title="Przełącz motyw" style="padding: 6px 10px;">
+                <svg id="theme-icon-moon" style="width: 16px; height: 16px; display: none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                <svg id="theme-icon-sun" style="width: 16px; height: 16px; display: none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            </button>
         </div>
 
         <?php if ($message): ?>
-            <div style="background: rgba(16, 185, 129, 0.1); color: #059669; padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px;">
+            <div style="background: var(--success-subtle); color: var(--success); border: 1px solid var(--border-subtle); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px;">
                 <?= Security::sanitize($message) ?>
             </div>
         <?php endif; ?>
 
         <?php if ($error): ?>
-            <div style="background: var(--danger-subtle); color: var(--danger); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px;">
+            <div style="background: var(--danger-subtle); color: var(--danger); border: 1px solid var(--border-subtle); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px;">
                 <?= Security::sanitize($error) ?>
             </div>
         <?php endif; ?>
@@ -149,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="hidden" name="action" value="request_reset">
                 <div class="form-group">
                     <label class="form-label" for="identity"><?= _e('Username or Email') ?></label>
-                    <input class="form-control" type="text" name="identity" id="identity" required autofocus placeholder="admin or email@example.com">
+                    <input class="form-control" type="text" name="identity" id="identity" required autofocus>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px; margin-top: 8px;">
                     <?= _e('Send Reset Link') ?>
@@ -174,5 +215,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <a href="login.php" class="back-link">&larr; <?= _e('Back to sign in') ?></a>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('theme-icon-sun');
+        const moonIcon = document.getElementById('theme-icon-moon');
+
+        const updateThemeUI = () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            if (sunIcon && moonIcon) {
+                if (currentTheme === 'dark') {
+                    sunIcon.style.display = 'inline-block';
+                    moonIcon.style.display = 'none';
+                } else {
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'inline-block';
+                }
+            }
+        };
+
+        if (toggleBtn) {
+            updateThemeUI();
+
+            toggleBtn.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                document.documentElement.setAttribute('data-theme', nextTheme);
+                localStorage.setItem('cmsbyphp_theme', nextTheme);
+                updateThemeUI();
+            });
+        }
+    });
+    </script>
 </body>
 </html>

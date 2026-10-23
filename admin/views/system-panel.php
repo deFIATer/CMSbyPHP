@@ -165,9 +165,9 @@ $codeCell = static function (string $value): string {
         </summary>
         <div style="margin-top: 10px; font-size: 12px; color: var(--text-muted); line-height: 1.7;">
             <p style="margin: 0 0 6px;"><?= _e('Directories: 755 for the code and 775 for every directory the CMS writes to. Files: 644, except the configuration file which may stay 640.') ?></p>
-            <pre style="margin: 0; padding: 12px; overflow: auto; background: var(--bg-surface, #1e293b); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 11px; line-height: 1.6;"><?= htmlspecialchars(
+            <pre style="margin: 0; padding: 12px; overflow: auto; background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 11px; line-height: 1.6;"><?= htmlspecialchars(
                 'chmod 755 . && chmod 644 index.php' . "\n"
-                . 'chmod -R 775 data uploads && chmod 640 data/cms.sqlite modoconfig.php' . "\n"
+                . 'chmod -R 775 data uploads && chmod 640 data/cms.sqlite cmsbyphpconfig.php' . "\n"
                 . 'chown -R ' . $setupOwner . ':' . $setupOwner . ' data uploads',
                 ENT_QUOTES,
                 'UTF-8'
@@ -184,7 +184,7 @@ $codeCell = static function (string $value): string {
     </h3>
     <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
         <?= sprintf(
-            __('ModoCMS keeps hardened .htaccess files in the project root, data/, uploads/ and plugins/. They hide the SQLite database, the configuration file, backups and the thumbnail cache, and they enable the pretty permalinks. This report compares every file with the shipped rule set (version %s).'),
+            __('CMSbyPHP keeps hardened .htaccess files in the project root, data/, uploads/ and plugins/. They hide the SQLite database, the configuration file, backups and the thumbnail cache, and they enable the pretty permalinks. This report compares every file with the shipped rule set (version %s).'),
             htmlspecialchars(\Core\Setup::VERSION, ENT_QUOTES, 'UTF-8')
         ) ?>
     </p>
@@ -244,13 +244,13 @@ $codeCell = static function (string $value): string {
         <input type="hidden" name="csrf_token" value="<?= \Core\Security::generateCsrfToken() ?>">
         <input type="hidden" name="action" value="setup_htaccess_deploy">
 
-        <div style="padding: 12px 14px; background: var(--bg-surface, #1e293b); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 14px;">
+        <div style="padding: 12px 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 14px;">
             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-main);">
                 <input type="checkbox" name="force_custom" value="1">
                 <?= _e('Replace custom files') ?>
             </label>
             <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px; margin-left: 24px; line-height: 1.4;">
-                <?= _e('Files that were not created by ModoCMS (no version marker) are normally left untouched. Enable this to overwrite them as well - a copy is always saved into data/backups/ first.') ?>
+                <?= _e('Files that were not created by CMSbyPHP (no version marker) are normally left untouched. Enable this to overwrite them as well - a copy is always saved into data/backups/ first.') ?>
             </p>
         </div>
 
@@ -320,7 +320,7 @@ $codeCell = static function (string $value): string {
             <p style="margin: 0 0 8px;">
                 <?= _e('nginx ignores .htaccess files completely. Paste the block below into the server { ... } section of your site configuration and reload nginx, otherwise the database and the cache stay downloadable.') ?>
             </p>
-            <pre style="margin: 0; padding: 12px; overflow: auto; background: var(--bg-surface, #1e293b); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 11px; line-height: 1.6;"><?= htmlspecialchars(\Core\Setup::webServerRules(), ENT_QUOTES, 'UTF-8') ?></pre>
+            <pre style="margin: 0; padding: 12px; overflow: auto; background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 11px; line-height: 1.6;"><?= htmlspecialchars(\Core\Setup::webServerRules(), ENT_QUOTES, 'UTF-8') ?></pre>
         </div>
     </details>
 </div>

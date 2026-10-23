@@ -1,9 +1,9 @@
 {
-    "name": "Modo Editorial",
+    "name": "CMSbyPHP Editorial",
     "slug": "editorial",
     "version": "2.0.0",
-    "author": "Modo CMS",
-    "description": "Magazynowy, responsywny motyw oparty na Bootstrap 5.3.8 (serif nagłówki, wyróżniony wpis). Pełne wykorzystanie API motywów Modo CMS.",
+    "author": "CMSbyPHP",
+    "description": "Magazynowy, responsywny motyw oparty na Bootstrap 5.3.8 (serif nagłówki, wyróżniony wpis). Pełne wykorzystanie API motywów CMSbyPHP.",
     "bootstrap_version": "5.3.8",
     "files": [
         "header.php", "footer.php", "page.php", "single.php",
@@ -57,7 +57,7 @@
                         "id": "modo_footer_text",
                         "type": "text",
                         "label": "Tekst w stopce",
-                        "default": "Zbudowano na Modo CMS",
+                        "default": "Zbudowano na CMSbyPHP",
                         "priority": 20
                     }
                 ]

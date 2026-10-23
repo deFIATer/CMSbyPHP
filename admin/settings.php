@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: settings.php?tab=system&htaccess_deployed=1');
         exit;
     } elseif (($_POST['action'] ?? '') === 'config_save') {
-        // Settings -> System: persist the hardening options in modoconfig.php.
+        // Settings -> System: persist the hardening options in cmsbyphpconfig.php.
         // Empty text/number/select fields remove the override again, switches are
         // always stored with their current position (an unchecked box means "off").
         $posted = is_array($_POST['config'] ?? null) ? $_POST['config'] : [];
@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $_SESSION['config_report'] = [
             'ok'      => (bool)$configResult['ok'],
-            'message' => $configResult['ok'] ? __('Hardening options saved to modoconfig.php.') : (string)$configResult['message'],
+            'message' => $configResult['ok'] ? __('Hardening options saved to cmsbyphpconfig.php.') : (string)$configResult['message'],
         ];
         header('Location: settings.php?tab=system&config_saved=1');
         exit;
@@ -134,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (($_POST['action'] ?? '') === 'config_delete') {
         $configResult = Config::delete();
 
-        // Removing modoconfig.php also removes the custom robots.txt override.
+        // Removing cmsbyphpconfig.php also removes the custom robots.txt override.
         if (class_exists('Core\Sitemap')) {
             try {
                 Sitemap::generateRobotsTxt();
@@ -383,6 +383,23 @@ require_once __DIR__ . '/views/header.php';
 .settings-tab:hover { color: var(--text-main, #0f172a); }
 .settings-tab.active { color: var(--primary, #3b82f6); border-color: var(--border-subtle); background: var(--bg-card, #fff); }
 .settings-wrap.tabs-ready .settings-panel:not(.active) { display: none !important; }
+
+@media (max-width: 768px) {
+    .settings-tabs {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+    }
+    .settings-tabs::-webkit-scrollbar { display: none; }
+    .settings-tab {
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+}
 </style>
 
 <form method="POST" action="">
@@ -398,7 +415,7 @@ require_once __DIR__ . '/views/header.php';
 
             <div class="form-group">
                 <label class="form-label" for="site_title"><?= _e('Site Title') ?></label>
-                <input class="form-control" type="text" id="site_title" name="site_title" value="<?= Security::sanitize(Router::getOption('site_title', 'Modo CMS')) ?>" required>
+                <input class="form-control" type="text" id="site_title" name="site_title" value="<?= Security::sanitize(Router::getOption('site_title', 'CMSbyPHP')) ?>" required>
             </div>
 
             <div class="form-group">
@@ -410,7 +427,7 @@ require_once __DIR__ . '/views/header.php';
                 <label class="form-label" for="site_url"><?= _e('Site Address (Domain)') ?></label>
                 <input class="form-control" type="text" id="site_url" name="site_url" value="<?= Security::sanitize(Router::getOption('site_url', '')) ?>" placeholder="<?= Security::sanitize(Router::getSiteUrl()) ?>">
                 <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 5px; line-height: 1.4;">
-                    <?= _e('Canonical domain used to build absolute URLs (canonical links, OpenGraph, sitemap and robots.txt). Enter just the domain (e.g. https://example.com) and the installation subfolder is added automatically, or the full address including the subfolder (e.g. https://example.com/modocms). Leave empty to auto-detect it from the current request.') ?>
+                    <?= _e('Canonical domain used to build absolute URLs (canonical links, OpenGraph, sitemap and robots.txt). Enter just the domain (e.g. https://example.com) and the installation subfolder is added automatically, or the full address including the subfolder (e.g. https://example.com/cmsbyphp). Leave empty to auto-detect it from the current request.') ?>
                 </small>
             </div>
 
@@ -438,7 +455,7 @@ require_once __DIR__ . '/views/header.php';
                 $homePageId = (int)Router::getOption('homepage_page_id', 0);
                 $postsPageId = (int)Router::getOption('posts_page_id', 0);
             ?>
-            <div style="background: var(--bg-surface, #1e293b); padding: 16px; border-radius: var(--radius-sm, 8px); border: 1px solid var(--border-subtle); margin-top: 10px;">
+            <div style="background: var(--bg-subtle); padding: 16px; border-radius: var(--radius-sm, 8px); border: 1px solid var(--border-subtle); margin-top: 10px;">
                 <label class="form-label" style="font-weight: 700; color: var(--text-main); margin-bottom: 10px;"><?= _e('Homepage Displays') ?></label>
                 
                 <div style="display: flex; gap: 20px; margin-bottom: 14px;">
@@ -522,7 +539,7 @@ require_once __DIR__ . '/views/header.php';
                 <small style="color: var(--text-muted);"><?= _e('Menu rendered in the header of the default themes. Built in Navigation & Menus.') ?></small>
             </div>
 
-            <div class="form-group" style="padding: 14px; background: var(--bg-surface, #1e293b); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-top: 4px;">
+            <div class="form-group" style="padding: 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-top: 4px;">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; color: var(--text-main);">
                     <input type="checkbox" name="multilingual_frontend" value="1" <?= Router::getOption('multilingual_frontend', '0') === '1' ? 'checked' : '' ?>>
                     <?= _e('Enable Multilingual Frontend') ?>
@@ -562,7 +579,7 @@ require_once __DIR__ . '/views/header.php';
             <div class="form-group" style="margin-bottom: 20px;">
                 <label class="form-label"><?= _e('Website Logo') ?></label>
                 <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px;">
-                    <div id="logo-preview-box" style="width: 140px; height: 50px; background: var(--bg-surface, #1e293b); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px;">
+                    <div id="logo-preview-box" style="width: 140px; height: 50px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px;">
                         <?php $currentLogo = Router::getOption('site_logo', ''); ?>
                         <img id="logo-preview-img" src="<?= $currentLogo ? htmlspecialchars($currentLogo, ENT_QUOTES, 'UTF-8') : '' ?>" alt="Logo" style="max-width: 100%; max-height: 100%; object-fit: contain; <?= empty($currentLogo) ? 'display:none;' : '' ?>">
                         <span id="logo-placeholder" style="font-size: 11px; color: var(--text-muted); <?= !empty($currentLogo) ? 'display:none;' : '' ?>"><?= _e('No Logo') ?></span>
@@ -580,7 +597,7 @@ require_once __DIR__ . '/views/header.php';
             <div class="form-group">
                 <label class="form-label"><?= _e('Favicon (.ico, .png, .svg)') ?></label>
                 <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px;">
-                    <div id="favicon-preview-box" style="width: 44px; height: 44px; background: var(--bg-surface, #1e293b); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    <div id="favicon-preview-box" style="width: 44px; height: 44px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; overflow: hidden;">
                         <?php $currentFavicon = Router::getOption('site_favicon', ''); ?>
                         <img id="favicon-preview-img" src="<?= $currentFavicon ? htmlspecialchars($currentFavicon, ENT_QUOTES, 'UTF-8') : '' ?>" alt="Favicon" style="width: 24px; height: 24px; object-fit: contain; <?= empty($currentFavicon) ? 'display:none;' : '' ?>">
                         <span id="favicon-placeholder" style="font-size: 10px; color: var(--text-muted); <?= !empty($currentFavicon) ? 'display:none;' : '' ?>"><?= _e('None') ?></span>
@@ -609,7 +626,7 @@ require_once __DIR__ . '/views/header.php';
                 <label class="form-label"><?= _e('Default Social Share Image (OG Image)') ?></label>
                 <div style="margin-bottom: 10px;">
                     <?php $currentOgImage = Router::getOption('og_default_image', ''); ?>
-                    <div id="og-preview-box" style="width: 100%; max-width: 480px; height: 160px; background: var(--bg-surface, #1e293b); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px;">
+                    <div id="og-preview-box" style="width: 100%; max-width: 480px; height: 160px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px;">
                         <img id="og-preview-img" src="<?= $currentOgImage ? htmlspecialchars($currentOgImage, ENT_QUOTES, 'UTF-8') : '' ?>" alt="OG Preview" style="width: 100%; height: 100%; object-fit: cover; <?= empty($currentOgImage) ? 'display:none;' : '' ?>">
                         <span id="og-placeholder" style="font-size: 12px; color: var(--text-muted); <?= !empty($currentOgImage) ? 'display:none;' : '' ?>"><?= _e('No Social Card Configured') ?></span>
                     </div>
@@ -771,7 +788,7 @@ require_once __DIR__ . '/views/header.php';
                 <?= _e('Content Revisions') ?>
             </h3>
 
-            <div class="form-group" style="padding: 14px; background: var(--bg-surface, #1e293b); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div class="form-group" style="padding: 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; color: var(--text-main);">
                     <input type="checkbox" name="revisions_enabled" value="1" <?= Router::getOption('revisions_enabled', '1') === '1' ? 'checked' : '' ?>>
                     <?= _e('Enable version history for posts & pages') ?>
@@ -974,7 +991,7 @@ require_once __DIR__ . '/views/header.php';
             </h3>
 
             <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 0 0 16px 0;">
-                <?= _e('Choose how Modo CMS sends e-mail. All plugins (e.g. Modo Form notifications) use this configuration.') ?>
+                <?= _e('Choose how CMSbyPHP sends e-mail. All plugins use this configuration.') ?>
             </p>
 
             <div class="form-group">
@@ -995,7 +1012,7 @@ require_once __DIR__ . '/views/header.php';
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
                     <label class="form-label" for="mail_from_name"><?= _e('Sender name (From)') ?></label>
-                    <input class="form-control" type="text" id="mail_from_name" name="mail_from_name" value="<?= Security::sanitize(Router::getOption('mail_from_name', '')) ?>" placeholder="<?= Security::sanitize(Router::getOption('site_title', 'Modo CMS')) ?>">
+                    <input class="form-control" type="text" id="mail_from_name" name="mail_from_name" value="<?= Security::sanitize(Router::getOption('mail_from_name', '')) ?>" placeholder="<?= Security::sanitize(Router::getOption('site_title', 'CMSbyPHP')) ?>">
                 </div>
             </div>
 
@@ -1130,7 +1147,7 @@ require_once __DIR__ . '/views/header.php';
         <?= _e('Domain Migration') ?>
     </h3>
     <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
-        <?= _e('Replace every occurrence of an old domain with a new one inside pages, posts, menus, custom fields, settings and theme options. Ideal after moving the site, e.g. from localhost to a live domain. The subfolder may be included, e.g. old localhost/modocms to new example.com.') ?>
+        <?= _e('Replace every occurrence of an old domain with a new one inside pages, posts, menus, custom fields, settings and theme options. Ideal after moving the site, e.g. from localhost to a live domain. The subfolder may be included, e.g. old localhost/cmsbyphp to new example.com.') ?>
     </p>
 
     <?php if ($migrationError !== ''): ?>
@@ -1183,7 +1200,7 @@ require_once __DIR__ . '/views/header.php';
             </div>
         </div>
 
-        <div class="form-group" style="padding: 12px 14px; background: var(--bg-surface, #1e293b); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+        <div class="form-group" style="padding: 12px 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-main);">
                 <input type="checkbox" name="include_www" value="1" <?= isset($_POST['include_www']) ? 'checked' : '' ?>>
                 <?= _e('Also migrate www / non-www variants') ?>

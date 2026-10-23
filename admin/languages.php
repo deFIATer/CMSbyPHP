@@ -119,7 +119,7 @@ require_once __DIR__ . '/views/header.php';
                             </td>
                         </tr>
                     <?php endforeach; ?>
-                    <tr style="background: #f8fafc;">
+                    <tr style="background: var(--table-header-bg);">
                         <td>
                             <input type="text" name="new_key" placeholder="<?= _e('Add new key...') ?>" class="form-control" style="font-family: monospace; font-size: 12px;">
                         </td>

@@ -1,14 +1,14 @@
-# Creating plugins (native Modo)
+# Creating plugins (native CMSbyPHP)
 
 [Polski](../pl/pluginy.md) | **English**
 
-This is a beginner-friendly guide to writing your own **native Modo plugins** using the hook system. If you are porting an existing GetSimple plugin, see [GetSimple-style plugins](getsimple-plugins.md) instead.
+This is a beginner-friendly guide to writing your own **native CMSbyPHP plugins** using the hook system. If you are porting an existing GetSimple plugin, see [GetSimple-style plugins](getsimple-plugins.md) instead.
 
 ---
 
 ## 1. What is a plugin?
 
-A plugin is a small PHP file (or a folder) that **adds new behaviour to Modo CMS without modifying the core**. You drop it into the `plugins/` folder, switch it on in the admin panel, and it starts working.
+A plugin is a small PHP file (or a folder) that **adds new behaviour to CMSbyPHP without modifying the core**. You drop it into the `plugins/` folder, switch it on in the admin panel, and it starts working.
 
 Think of the CMS as a house with **sockets** (called *hooks*) installed in the walls:
 
@@ -21,7 +21,7 @@ That is the whole idea: your plugin does not edit core files — it **plugs into
 
 ## 2. Where does a plugin live?
 
-Modo's `Core\PluginLoader` scans the `plugins/` directory and loads the entry file of every **active** plugin. A plugin can be organised in three ways:
+CMSbyPHP's `Core\PluginLoader` scans the `plugins/` directory and loads the entry file of every **active** plugin. A plugin can be organised in three ways:
 
 | Layout | Entry file that gets loaded |
 |---|---|
@@ -135,7 +135,7 @@ Create `plugins/hello-world.php`:
 <?php
 /**
  * Plugin Name: Hello World Filter
- * Description: Demonstrates hooks and content filtration in Modo CMS.
+ * Description: Demonstrates hooks and content filtration in CMSbyPHP.
  *
  * @package HelloWorld
  */
@@ -148,7 +148,7 @@ Hooks::addFilter('the_content', function (string $content): string {
     if (defined('IN_ADMIN') && IN_ADMIN === true) {
         return $content;
     }
-    return $content . '<p style="color:#64748b;font-style:italic;">Powered by Modo CMS</p>';
+    return $content . '<p style="color:#64748b;font-style:italic;">Powered by CMSbyPHP</p>';
 });
 ```
 

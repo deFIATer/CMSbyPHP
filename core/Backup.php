@@ -29,7 +29,7 @@ final class Backup {
         } catch (\Throwable $e) {}
 
         $backupDir = self::getBackupDir();
-        $filename = 'modocms-db-' . date('Y-m-d-His') . '.sqlite';
+        $filename = 'cmsbyphp-db-' . date('Y-m-d-His') . '.sqlite';
         $destPath = $backupDir . '/' . $filename;
 
         // Use native VACUUM INTO if supported (SQLite 3.27+), fallback to clean copy
@@ -55,7 +55,7 @@ final class Backup {
         }
 
         $backupDir = self::getBackupDir();
-        $zipFilename = 'modocms-full-backup-' . date('Y-m-d-His') . '.zip';
+        $zipFilename = 'cmsbyphp-full-backup-' . date('Y-m-d-His') . '.zip';
         $zipPath = $backupDir . '/' . $zipFilename;
 
         // Create temporary DB snapshot first to prevent locking/WAL discrepancies

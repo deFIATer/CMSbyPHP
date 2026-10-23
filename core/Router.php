@@ -72,7 +72,7 @@ final class Router {
         try {
             $db = Database::getConnection();
             $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-            $ipHash = hash('sha256', $ipAddress . 'modocms_salt');
+            $ipHash = hash('sha256', $ipAddress . 'cmsbyphp_salt');
 
             $checkStmt = $db->prepare("
                 SELECT id 
@@ -244,7 +244,7 @@ final class Router {
             return;
         }
 
-        $siteName = self::getOption('site_name', 'ModoCMS');
+        $siteName = self::getOption('site_name', 'CMSbyPHP');
         $headline = __('Maintenance');
         $notice = $message !== '' ? $message : __('The site is temporarily unavailable. Please come back soon.');
         $minutes = (int)ceil($retryAfter / 60);
@@ -295,6 +295,14 @@ final class Router {
             return;
         }
 
+        // Dynamic RSS 2.0 Feed (CMSbyPHP)
+        if (in_array($normalizedPath, ['/feed', '/feed.xml', '/rss.xml', '/rss'], true)) {
+            header('Content-Type: application/rss+xml; charset=utf-8');
+            header('X-Robots-Tag: noindex, follow');
+            echo self::generateRssFeed();
+            return;
+        }
+
         // Dynamic Robots.txt
         if ($normalizedPath === '/robots.txt') {
             header('Content-Type: text/plain; charset=utf-8');
@@ -326,6 +334,29 @@ final class Router {
         }
 
         self::trackVisit();
+
+        // Password-protected and public media routing: /file/{id} or /file/{id}/{filename}
+        if (preg_match('#^/file/(\d+)(?:/(.*))?$#', $normalizedPath, $fileMatches)) {
+            $mediaId = (int)$fileMatches[1];
+            $filename = $fileMatches[2] ?? '';
+            ProtectedMedia::handleRoute($mediaId, $filename);
+            return;
+        }
+
+        // Intercept requests to /uploads/... that were turned private
+        if (str_starts_with($normalizedPath, '/uploads/')) {
+            $reqFilename = basename($normalizedPath);
+            try {
+                $db = Database::getConnection();
+                $stmt = $db->prepare("SELECT id, filename, is_private FROM media WHERE filepath LIKE :p OR filename = :f LIMIT 1");
+                $stmt->execute([':p' => '%' . $reqFilename, ':f' => $reqFilename]);
+                $foundMedia = $stmt->fetch(\PDO::FETCH_ASSOC);
+                if ($foundMedia && !empty($foundMedia['is_private'])) {
+                    ProtectedMedia::handleRoute((int)$foundMedia['id'], $foundMedia['filename']);
+                    return;
+                }
+            } catch (\Throwable $e) {}
+        }
 
         if (isset($this->registeredRoutes[$requestMethod][$normalizedPath])) {
             call_user_func($this->registeredRoutes[$requestMethod][$normalizedPath]);
@@ -669,7 +700,7 @@ final class Router {
      *  - site_page : site name + separator + page name
      */
     public static function formatDocumentTitle(string $pageTitle, bool $isHomepage = false): string {
-        $siteTitle = trim(self::getOption('site_title', 'Modo CMS'));
+        $siteTitle = trim(self::getOption('site_title', 'CMSbyPHP'));
         $pageTitle = trim($pageTitle);
 
         if ($pageTitle === '') {
@@ -758,5 +789,62 @@ final class Router {
         }
 
         return 'blog';
+    }
+
+    /**
+     * Generates a valid RSS 2.0 feed for CMSbyPHP
+     */
+    public static function generateRssFeed(): string {
+        $db = Database::getConnection();
+        $siteTitle = self::getOption('site_title', 'CMSbyPHP');
+        $siteDesc = self::getOption('site_description', 'Blog');
+        $siteUrl = self::getSiteUrl();
+        $postsSlug = self::getPostsPageSlug();
+
+        $stmt = $db->query("
+            SELECT p.*, u.username as author_name 
+            FROM pages p
+            LEFT JOIN users u ON p.author_id = u.id
+            WHERE p.type = 'post' AND p.status = 'published'
+            ORDER BY p.created_at DESC
+            LIMIT 25
+        ");
+        $posts = $stmt->fetchAll();
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">' . "\n";
+        $xml .= '  <channel>' . "\n";
+        $xml .= '    <title>' . htmlspecialchars($siteTitle, ENT_XML1, 'UTF-8') . '</title>' . "\n";
+        $xml .= '    <link>' . htmlspecialchars($siteUrl, ENT_XML1, 'UTF-8') . '</link>' . "\n";
+        $xml .= '    <description>' . htmlspecialchars($siteDesc, ENT_XML1, 'UTF-8') . '</description>' . "\n";
+        $xml .= '    <language>' . htmlspecialchars(I18n::getLocale(), ENT_XML1, 'UTF-8') . '</language>' . "\n";
+        $xml .= '    <generator>CMSbyPHP 1.0</generator>' . "\n";
+        $xml .= '    <atom:link href="' . htmlspecialchars($siteUrl . '/feed', ENT_XML1, 'UTF-8') . '" rel="self" type="application/rss+xml" />' . "\n";
+        $xml .= '    <lastBuildDate>' . date(DATE_RSS) . '</lastBuildDate>' . "\n";
+
+        foreach ($posts as $post) {
+            $postUrl = rtrim($siteUrl, '/') . '/' . $postsSlug . '/' . $post['slug'];
+            $pubDate = !empty($post['created_at']) ? date(DATE_RSS, strtotime($post['created_at'])) : date(DATE_RSS);
+            $excerpt = strip_tags((string)($post['content'] ?? ''));
+            if (mb_strlen($excerpt) > 300) {
+                $excerpt = mb_substr($excerpt, 0, 300) . '...';
+            }
+
+            $xml .= '    <item>' . "\n";
+            $xml .= '      <title>' . htmlspecialchars($post['title'], ENT_XML1, 'UTF-8') . '</title>' . "\n";
+            $xml .= '      <link>' . htmlspecialchars($postUrl, ENT_XML1, 'UTF-8') . '</link>' . "\n";
+            $xml .= '      <guid isPermaLink="true">' . htmlspecialchars($postUrl, ENT_XML1, 'UTF-8') . '</guid>' . "\n";
+            $xml .= '      <pubDate>' . $pubDate . '</pubDate>' . "\n";
+            if (!empty($post['author_name'])) {
+                $xml .= '      <author>' . htmlspecialchars($post['author_name'], ENT_XML1, 'UTF-8') . '</author>' . "\n";
+            }
+            $xml .= '      <description>' . htmlspecialchars($excerpt, ENT_XML1, 'UTF-8') . '</description>' . "\n";
+            $xml .= '    </item>' . "\n";
+        }
+
+        $xml .= '  </channel>' . "\n";
+        $xml .= '</rss>' . "\n";
+
+        return $xml;
     }
 }

@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('admin-sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     const menuBtn = document.getElementById('mobile-menu-btn');
+    const closeBtn = document.getElementById('mobile-sidebar-close');
 
     if (!sidebar || !menuBtn) return;
 
@@ -50,6 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (overlay) {
         overlay.addEventListener('click', closeDrawer);
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeDrawer);
     }
 
     // Close the drawer after tapping a navigation link on mobile.
@@ -83,4 +88,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sync();
     window.addEventListener('resize', sync);
+
+    // Interactive submenu accordion in admin sidebar
+    document.querySelectorAll('.nav-group').forEach((group) => {
+        const arrow = group.querySelector('.nav-arrow');
+        if (arrow) {
+            arrow.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                group.classList.toggle('open');
+            });
+        }
+    });
 });

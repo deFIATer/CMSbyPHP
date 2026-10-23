@@ -5,7 +5,7 @@
  * Renders every option declared in Core\Config::definitions() (debug flags,
  * timezone, URL overrides, maintenance mode, HTTPS redirect, upload limits,
  * session cookie flag, plugin hardening ...) as a form and stores the answers in
- * modoconfig.php through Core\Config::save(). The file is portable: copy it to
+ * cmsbyphpconfig.php through Core\Config::save(). The file is portable: copy it to
  * another installation and the same hardening applies.
  *
  * Expected variables:
@@ -36,8 +36,8 @@ if (!isset($codeCell)) {
     };
 }
 
-$hardeningInputStyle = 'width:100%;padding:8px 10px;font-size:12px;background:var(--bg-surface, #1e293b);'
-    . 'border:1px solid var(--border-subtle);border-radius:var(--radius-sm);color:var(--text-main);';
+$hardeningInputStyle = 'width:100%;padding:8px 10px;font-size:12px;background:var(--input-bg);'
+    . 'border:1px solid var(--input-border);border-radius:var(--radius-sm);color:var(--text-main);';
 $hardeningBadge = static function (string $label, string $severity) use ($severityColors): string {
     $color = $severityColors[$severity] ?? '#94a3b8';
 
@@ -47,17 +47,17 @@ $hardeningBadge = static function (string $label, string $severity) use ($severi
 };
 ?>
 
-<!-- ===================== Production hardening (modoconfig.php) ===================== -->
+<!-- ===================== Production hardening (cmsbyphpconfig.php) ===================== -->
 <div class="card settings-panel" data-tab="system">
     <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; color: var(--text-main);">
         <?= _e('Production hardening') ?>
     </h3>
     <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
-        <?= _e('Every option below is written to modoconfig.php in the project root. The file is read before the database is opened, so its values win over the Settings screen - delete a line to fall back to the default. Because it is a plain PHP file you can copy it to staging or to the live server to apply exactly the same hardening.') ?>
+        <?= _e('Every option below is written to cmsbyphpconfig.php in the project root. The file is read before the database is opened, so its values win over the Settings screen - delete a line to fall back to the default. Because it is a plain PHP file you can copy it to staging or to the live server to apply exactly the same hardening.') ?>
     </p>
 
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;">
-        <?= $hardeningBadge($advancedFile['exists'] ? __('modoconfig.php present') : __('modoconfig.php missing'), $advancedFile['exists'] ? 'success' : 'muted') ?>
+        <?= $hardeningBadge($advancedFile['exists'] ? __('cmsbyphpconfig.php present') : __('cmsbyphpconfig.php missing'), $advancedFile['exists'] ? 'success' : 'muted') ?>
         <?= $hardeningBadge($advancedFile['writable'] ? __('Writable') : __('Not writable'), $advancedFile['writable'] ? 'success' : 'warning') ?>
         <?= $hardeningBadge(sprintf(__('%d option(s) overridden'), (int)$advancedFile['count']), 'info') ?>
     </div>
@@ -78,7 +78,7 @@ $hardeningBadge = static function (string $label, string $severity) use ($severi
 
     <?php if (!$advancedFile['exists']): ?>
         <div style="border-left: 4px solid var(--primary, #3b82f6); background: rgba(59, 130, 246, 0.08); padding: 12px 16px; border-radius: var(--radius-sm); color: #93c5fd; font-size: 12px; line-height: 1.6;">
-            <?= _e('No modoconfig.php yet - every option follows the built-in default (or the matching Settings value). Save this form to create the file.') ?>
+            <?= _e('No cmsbyphpconfig.php yet - every option follows the built-in default (or the matching Settings value). Save this form to create the file.') ?>
         </div>
     <?php endif; ?>
 </div>
@@ -108,13 +108,13 @@ $hardeningBadge = static function (string $label, string $severity) use ($severi
                     $fromFile = array_key_exists($key, $advancedFileValues);
                     $fromSetting = !$fromFile && !empty($advancedSettings[$key]);
                 ?>
-                <div style="padding: 12px 14px; margin-bottom: 10px; background: var(--bg-surface, #1e293b); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                <div style="padding: 12px 14px; margin-bottom: 10px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
                         <label for="config-<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?>" style="font-size: 13px; font-weight: 600; color: var(--text-main);">
                             <?= \Core\Security::sanitize(__($label)) ?>
                         </label>
                         <?php if ($fromFile): ?>
-                            <?= $hardeningBadge(__('modoconfig.php'), 'info') ?>
+                            <?= $hardeningBadge(__('cmsbyphpconfig.php'), 'info') ?>
                         <?php elseif ($fromSetting): ?>
                             <?= $hardeningBadge(__('Settings screen'), 'muted') ?>
                         <?php else: ?>
@@ -165,7 +165,7 @@ $hardeningBadge = static function (string $label, string $severity) use ($severi
     <?php endforeach; ?>
 
     <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
-        <?= _e('Empty fields remove the line from modoconfig.php, so the option falls back to the Settings screen or to the built-in default again. Switches are always stored with their current position, so for them the file always overrides the Settings screen.') ?>
+        <?= _e('Empty fields remove the line from cmsbyphpconfig.php, so the option falls back to the Settings screen or to the built-in default again. Switches are always stored with their current position, so for them the file always overrides the Settings screen.') ?>
     </p>
 
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -186,7 +186,7 @@ $hardeningBadge = static function (string $label, string $severity) use ($severi
         <?= $codeCell($advancedFile['path']) ?>
     </div>
 
-    <pre style="margin: 0 0 14px; padding: 14px; max-height: 340px; overflow: auto; font-size: 11px; line-height: 1.6; background: var(--bg-main, #0f172a); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-main); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;"><?= htmlspecialchars((string)$advancedFile['source'], ENT_QUOTES, 'UTF-8') ?></pre>
+    <pre style="margin: 0 0 14px; padding: 14px; max-height: 340px; overflow: auto; font-size: 11px; line-height: 1.6; background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-main); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;"><?= htmlspecialchars((string)$advancedFile['source'], ENT_QUOTES, 'UTF-8') ?></pre>
 
     <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px;">
         <?= _e('The package also ships a commented sample that lists every supported option:') ?>

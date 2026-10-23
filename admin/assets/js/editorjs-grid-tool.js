@@ -56,11 +56,11 @@
         }
 
         var overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(11,15,25,.8);z-index:100000;'
+        overlay.style.cssText = 'position:fixed;inset:0;background:var(--modal-overlay);z-index:100000;'
             + 'display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:20px;';
 
         var box = document.createElement('div');
-        box.style.cssText = 'width:100%;max-width:520px;background:var(--bg-card,#111827);'
+        box.style.cssText = 'width:100%;max-width:520px;background:var(--modal-bg);'
             + 'border:1px solid var(--border-subtle);border-radius:var(--radius-md,10px);padding:20px;'
             + 'display:flex;flex-direction:column;gap:14px;';
 

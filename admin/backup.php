@@ -51,7 +51,7 @@ if (isset($_GET['delete']) && isset($_GET['csrf'])) {
             header('Location: backup.php?deleted=1');
             exit;
         } else {
-            $message = 'Could not delete backup file.';
+            $message = __('Could not delete backup file.');
             $messageType = 'danger';
         }
     }
@@ -136,7 +136,7 @@ require_once __DIR__ . '/views/header.php';
 </div>
 
 <!-- 1-Click Action Hub -->
-<div class="card" style="padding: 24px; margin-bottom: 28px; border: 1px solid var(--border-subtle); background: var(--bg-surface, #1e293b);">
+<div class="card" style="padding: 24px; margin-bottom: 28px; border: 1px solid var(--border-subtle); background: var(--bg-card);">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
         <div>
             <h3 style="margin: 0 0 6px 0; font-size: 16px; color: var(--text-main); font-weight: 700;"><?= _e('Create a New Backup') ?></h3>
@@ -159,7 +159,7 @@ require_once __DIR__ . '/views/header.php';
             <form method="POST" action="">
                 <input type="hidden" name="action" value="create_full">
                 <input type="hidden" name="csrf_token" value="<?= Security::generateCsrfToken() ?>">
-                <button type="submit" class="btn btn-primary" <?= !$zipSupported ? 'disabled title="ZipArchive PHP extension is missing"' : '' ?> style="padding: 10px 20px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px;">
+                <button type="submit" class="btn btn-primary" <?= !$zipSupported ? 'disabled title="' . htmlspecialchars(__('ZipArchive PHP extension is missing'), ENT_QUOTES, 'UTF-8') . '"' : '' ?> style="padding: 10px 20px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px;">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                     <strong><?= _e('Full Backup (ZIP)') ?></strong>
                 </button>
@@ -170,7 +170,7 @@ require_once __DIR__ . '/views/header.php';
 
 <!-- Backups Archives List -->
 <div class="card" style="padding: 0; overflow: hidden; border: 1px solid var(--border-subtle);">
-    <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface, #1e293b); font-weight: 700; font-size: 14px; color: var(--text-main);">
+    <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); background: var(--table-header-bg); font-weight: 700; font-size: 14px; color: var(--text-main);">
         <?= _e('Existing Backup Files') ?>
     </div>
 

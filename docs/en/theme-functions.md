@@ -2,7 +2,7 @@
 
 [Polski](../pl/funkcje-motywu.md) | **English**
 
-Every theme and plugin in Modo CMS is built from a set of **global helper functions**. This page explains each one in plain language: *what it does*, *what you give it*, *what it gives back*, and *how to use it*. You do not need to be a PHP expert to start — most of them are one-liners.
+Every theme and plugin in CMSbyPHP is built from a set of **global helper functions**. This page explains each one in plain language: *what it does*, *what you give it*, *what it gives back*, and *how to use it*. You do not need to be a PHP expert to start — most of them are one-liners.
 
 > Most functions **print output by default** (`$echo = true`) and also **return** the value, so you can either use `<?php page_title(); ?>` to print, or `$t = page_title(false);` to store.
 
@@ -356,7 +356,7 @@ Returns the public URLs of the active framework's bundled stylesheets (advanced 
 Reads a customizer value (published in the `theme_mods` table, or the live draft preview).
 
 ```php
-$footerText = get_theme_mod('modo_footer_text', 'Built with Modo CMS');
+$footerText = get_theme_mod('modo_footer_text', 'Built with CMSbyPHP');
 ```
 
 ### `the_theme_mod(string $key, mixed $default = ''): void`

@@ -43,10 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
     $form = ['id' => $categoryId, 'name' => $name, 'slug' => $slug, 'description' => $description];
 
     if ($name === '') {
-        $message = 'Category name is required.';
+        $message = __('Category name is required.');
         $messageType = 'danger';
     } elseif ($slug === '') {
-        $message = 'Category slug is required.';
+        $message = __('Category slug is required.');
         $messageType = 'danger';
     } else {
         try {
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
             header('Location: categories.php?edit=' . $categoryId . '&saved=1');
             exit;
         } catch (\PDOException $e) {
-            $message = 'A category with that name or slug already exists.';
+            $message = __('A category with that name or slug already exists.');
             $messageType = 'danger';
         }
     }
@@ -168,7 +168,7 @@ require_once __DIR__ . '/views/header.php';
     <div class="card" style="padding: 0; overflow: hidden;">
         <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
             <h2 style="font-size: 15px; font-weight: 600; margin: 0;"><?= _e('All Categories') ?></h2>
-            <span class="badge" style="font-size: 11px; background: var(--bg-surface, #1e293b); border: 1px solid var(--border-subtle); color: var(--text-muted);"><?= count($allCategories) ?></span>
+            <span class="badge" style="font-size: 11px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); color: var(--text-muted);"><?= count($allCategories) ?></span>
         </div>
 
         <?php if (empty($allCategories)): ?>

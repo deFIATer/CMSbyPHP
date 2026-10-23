@@ -2,7 +2,7 @@
 
 [Polski](../pl/przyklady.md) | **English**
 
-Copy-paste-ready examples for extending Modo CMS. Each one is a complete plugin file — drop it into `plugins/`, activate it in **Plugins**, and it works.
+Copy-paste-ready examples for extending CMSbyPHP. Each one is a complete plugin file — drop it into `plugins/`, activate it in **Plugins**, and it works.
 
 > All examples start with `declare(strict_types=1);` and avoid external CDNs, in line with the project's conventions.
 
@@ -28,7 +28,7 @@ Hooks::addFilter('the_content', function (string $content): string {
     if (defined('IN_ADMIN') && IN_ADMIN === true) {
         return $content;
     }
-    return $content . '<p style="color:#64748b;font-style:italic;">Powered by Modo CMS</p>';
+    return $content . '<p style="color:#64748b;font-style:italic;">Powered by CMSbyPHP</p>';
 });
 ```
 

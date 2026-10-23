@@ -1,0 +1,10 @@
+# CMSbyPHP .htaccess - Protected media storage
+# Direct HTTP access is completely forbidden. Files can only be accessed through the CMS gatekeeper.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
+Options -Indexes -ExecCGI

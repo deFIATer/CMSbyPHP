@@ -6,10 +6,10 @@ namespace Core;
 /**
  * Class Config
  *
- * File-based advanced configuration - the ModoCMS equivalent of GetSimple's
+ * File-based advanced configuration - the CMSbyPHP equivalent of GetSimple's
  * gsconfig.php.
  *
- * Values stored in modoconfig.php (project root) WIN over the matching database
+ * Values stored in cmsbyphpconfig.php (project root) WIN over the matching database
  * setting and over the built-in default, because this file is loaded before the
  * database connection is opened. Deleting a key from the file makes the value
  * coming from the Settings screen (or the built-in default) apply again.
@@ -19,10 +19,12 @@ namespace Core;
  */
 final class Config {
     /** Advanced configuration file (project root). */
-    public const FILENAME = 'modoconfig.php';
+    public const FILENAME = 'cmsbyphpconfig.php';
+    public const LEGACY_FILENAME = 'modoconfig.php';
 
     /** Documented template that is shipped with every installation. */
-    public const SAMPLE_FILENAME = 'modoconfig.sample.php';
+    public const SAMPLE_FILENAME = 'cmsbyphpconfig.sample.php';
+    public const LEGACY_SAMPLE_FILENAME = 'modoconfig.sample.php';
 
     /** @var array<string,mixed>|null Loaded overrides. */
     private static ?array $values = null;
@@ -37,11 +39,27 @@ final class Config {
     }
 
     public static function path(): string {
-        return self::rootPath() . '/' . self::FILENAME;
+        $primary = self::rootPath() . '/' . self::FILENAME;
+        if (is_file($primary)) {
+            return $primary;
+        }
+        $legacy = self::rootPath() . '/' . self::LEGACY_FILENAME;
+        if (is_file($legacy)) {
+            return $legacy;
+        }
+        return $primary;
     }
 
     public static function samplePath(): string {
-        return self::rootPath() . '/' . self::SAMPLE_FILENAME;
+        $primary = self::rootPath() . '/' . self::SAMPLE_FILENAME;
+        if (is_file($primary)) {
+            return $primary;
+        }
+        $legacy = self::rootPath() . '/' . self::LEGACY_SAMPLE_FILENAME;
+        if (is_file($legacy)) {
+            return $legacy;
+        }
+        return $primary;
     }
 
     public static function exists(): bool {
@@ -295,7 +313,7 @@ final class Config {
         $source  = "<?php\n";
         $source .= "declare(strict_types=1);\n\n";
         $source .= "/**\n";
-        $source .= " * ModoCMS advanced configuration - the equivalent of GetSimple's gsconfig.php.\n";
+        $source .= " * CMSbyPHP advanced configuration - the equivalent of GetSimple's gsconfig.php.\n";
         $source .= " *\n";
         $source .= " * Values listed here OVERRIDE the Settings screen and the built-in defaults,\n";
         $source .= " * because this file is read before the database connection is opened.\n";
@@ -324,9 +342,9 @@ final class Config {
         $source  = "<?php\n";
         $source .= "declare(strict_types=1);\n\n";
         $source .= "/**\n";
-        $source .= " * ModoCMS advanced configuration - SAMPLE FILE.\n";
+        $source .= " * CMSbyPHP advanced configuration - SAMPLE FILE.\n";
         $source .= " *\n";
-        $source .= " * Copy this file to modoconfig.php (or let Settings -> System write it for you)\n";
+        $source .= " * Copy this file to cmsbyphpconfig.php (or let Settings -> System write it for you)\n";
         $source .= " * and uncomment the lines you need. Values set here override the matching option\n";
         $source .= " * from the Settings screen.\n";
         $source .= " */\n\n";
@@ -467,9 +485,9 @@ final class Config {
                 'default'   => '',
                 'group'     => 'urls',
                 'label'     => 'Site URL override',
-                'help'      => 'Absolute base URL of the installation including the subfolder, e.g. https://example.com or https://example.com/modocms. Feeds canonical links, OpenGraph tags, the sitemap and robots.txt.',
+                'help'      => 'Absolute base URL of the installation including the subfolder, e.g. https://example.com or https://example.com/cmsbyphp. Feeds canonical links, OpenGraph tags, the sitemap and robots.txt.',
                 'overrides' => 'site_url',
-                'placeholder' => 'https://example.com/modocms',
+                'placeholder' => 'https://example.com/cmsbyphp',
             ],
             'robots_txt' => [
                 'type'        => 'textarea',

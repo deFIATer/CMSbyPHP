@@ -1,9 +1,9 @@
 <?php
 /**
  * Modo Bootstrap Dark — header.php
- * Responsive Bootstrap 5 (dark) theme for Modo CMS (full theme API).
+ * Responsive Bootstrap 5 (dark) theme for CMSbyPHP (full theme API).
  */
-if (!function_exists('site_title')) { die('Modo CMS theme'); }
+if (!function_exists('site_title')) { die('CMSbyPHP theme'); }
 $themeUrl = htmlspecialchars(get_theme_url(), ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>

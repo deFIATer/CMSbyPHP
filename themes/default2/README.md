@@ -1,6 +1,6 @@
-# Modo Bootstrap Dark (`default2`) — motyw Modo CMS
+# CMSbyPHP Bootstrap Dark (`default2`) — motyw CMSbyPHP
 
-Nowoczesny, ciemny motyw dla Modo CMS oparty na **Bootstrap 5.3.8** (tryb `data-bs-theme="dark"`),
+Nowoczesny, ciemny motyw dla CMSbyPHP oparty na **Bootstrap 5.3.8** (tryb `data-bs-theme="dark"`),
 z gradientowymi hero i szklanymi kartami.
 
 ## Instalacja

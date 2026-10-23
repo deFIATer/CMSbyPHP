@@ -2,7 +2,7 @@
 
 **Polski** | [English](../en/theme-functions.md)
 
-Każdy motyw i plugin w Modo CMS korzysta z zestawu **globalnych funkcji pomocniczych**. Ta strona wyjaśnia każdą z nich po ludzku: *co robi*, *co jej podajesz*, *co zwraca* i *jak jej użyć*. Nie musisz być ekspertem od PHP — większość to jednolinijkowce.
+Każdy motyw i plugin w CMSbyPHP korzysta z zestawu **globalnych funkcji pomocniczych**. Ta strona wyjaśnia każdą z nich po ludzku: *co robi*, *co jej podajesz*, *co zwraca* i *jak jej użyć*. Nie musisz być ekspertem od PHP — większość to jednolinijkowce.
 
 > Większość funkcji **domyślnie wypisuje wynik** (`$echo = true`) i jednocześnie **go zwraca**, więc możesz albo użyć `<?php page_title(); ?>` do wypisania, albo `$t = page_title(false);` do zapisania w zmiennej.
 
@@ -362,7 +362,7 @@ Zwraca publiczne URL-e dołączonych arkuszy aktywnego frameworka (użycie zaawa
 Czyta wartość customizera (opublikowaną w tabeli `theme_mods` albo szkic podglądu na żywo).
 
 ```php
-$footerText = get_theme_mod('modo_footer_text', 'Zbudowano na Modo CMS');
+$footerText = get_theme_mod('modo_footer_text', 'Zbudowano na CMSbyPHP');
 ```
 
 ### `the_theme_mod(string $key, mixed $default = ''): void`

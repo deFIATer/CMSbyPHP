@@ -38,7 +38,7 @@
 
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small text-body-secondary">
                 <span>&copy; <?= date('Y') ?> <?= site_title(false) ?>. <?= _e('All rights reserved.') ?></span>
-                <span><?= htmlspecialchars((string) get_theme_mod('modo_footer_text', __('Built with Modo CMS')), ENT_QUOTES, 'UTF-8') ?></span>
+                <span><?= htmlspecialchars((string) get_theme_mod('modo_footer_text', __('Built with CMSbyPHP')), ENT_QUOTES, 'UTF-8') ?></span>
             </div>
         </div>
     </footer>

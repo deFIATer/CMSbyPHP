@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $newToken = 'cms_' . bin2hex(random_bytes(24));
     $stmt = $db->prepare("UPDATE users SET api_token = :token WHERE id = :id");
     $stmt->execute([':token' => $newToken, ':id' => Auth::id()]);
-    $msg = 'Generated new API token.';
+    $msg = __('Generated new API token.');
     $user = Auth::user();
 }
 
@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'disab
 
 $totpUri = '';
 if (!$totpEnabled && $pendingSecret !== '') {
-    $issuer = \Core\Router::getOption('site_title', 'Modo CMS');
+    $issuer = \Core\Router::getOption('site_title', 'CMSbyPHP');
     $totpUri = \Core\Totp::provisioningUri($pendingSecret, (string)($user['username'] ?? 'admin'), $issuer);
 }
 
@@ -143,12 +143,12 @@ require_once __DIR__ . '/views/header.php';
 
             <div class="form-group">
                 <label class="form-label"><?= _e('Username') ?></label>
-                <input class="form-control" type="text" value="<?= Security::sanitize($user['username'] ?? '') ?>" disabled style="background:#f1f5f9;">
+                <input class="form-control" type="text" value="<?= Security::sanitize($user['username'] ?? '') ?>" disabled style="background:var(--bg-subtle); color:var(--text-muted);">
             </div>
 
             <div class="form-group">
                 <label class="form-label"><?= _e('Role') ?></label>
-                <input class="form-control" type="text" value="<?= strtoupper(Security::sanitize($user['role'] ?? '')) ?>" disabled style="background:#f1f5f9;">
+                <input class="form-control" type="text" value="<?= strtoupper(Security::sanitize($user['role'] ?? '')) ?>" disabled style="background:var(--bg-subtle); color:var(--text-muted);">
             </div>
 
             <div class="form-group">
@@ -186,9 +186,9 @@ require_once __DIR__ . '/views/header.php';
     </div>
 
     <div class="card">
-        <h2 style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">REST API Access</h2>
+        <h2 style="font-size: 15px; font-weight: 700; margin-bottom: 8px;"><?= _e('REST API Access') ?></h2>
         <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
-            Token used to authenticate external integrations sending content to Modo CMS.
+            <?= _e('Token used to authenticate external integrations sending content to CMSbyPHP.') ?>
         </p>
 
         <form method="POST" action="">
@@ -196,22 +196,22 @@ require_once __DIR__ . '/views/header.php';
             <input type="hidden" name="csrf_token" value="<?= Security::generateCsrfToken() ?>">
 
             <div class="form-group">
-                <label class="form-label">Bearer Token</label>
-                <input class="form-control" type="text" value="<?= Security::sanitize((string)$currentApiToken) ?>" readonly style="background: #f8fafc; font-family: monospace; font-size: 12px;">
+                <label class="form-label"><?= _e('Bearer Token') ?></label>
+                <input class="form-control" type="text" value="<?= Security::sanitize((string)$currentApiToken) ?>" readonly style="background: var(--bg-subtle); color: var(--text-main); font-family: monospace; font-size: 12px;">
             </div>
 
             <button type="submit" class="btn btn-secondary" style="width: 100%;"
                     data-confirm
-                    data-confirm-title="<?= empty($currentApiToken) ? 'Generate API Token' : 'Regenerate API Token' ?>"
+                    data-confirm-title="<?= empty($currentApiToken) ? _e('Generate API Token') : _e('Regenerate API Token') ?>"
                     data-confirm-message="<?= _e('Regenerate API token? Current key will stop working immediately.') ?>"
                     data-confirm-ok="<?= _e('Confirm') ?>">
-                <?= empty($currentApiToken) ? 'Generate API Token' : 'Regenerate API Token' ?>
+                <?= empty($currentApiToken) ? _e('Generate API Token') : _e('Regenerate API Token') ?>
             </button>
         </form>
 
         <div style="margin-top: 20px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 12px;">
             <strong>Endpoint:</strong>
-            <code style="display: block; background: #f1f5f9; padding: 6px; border-radius: 4px; margin-top: 4px; word-break: break-all;">
+            <code style="display: block; background: var(--bg-subtle); color: var(--text-main); padding: 6px; border-radius: 4px; margin-top: 4px; word-break: break-all;">
                 /api/content.php
             </code>
         </div>
@@ -250,7 +250,7 @@ require_once __DIR__ . '/views/header.php';
                 <div id="totp-qr" style="background: #fff; padding: 8px; border-radius: 8px;"></div>
                 <div style="font-size: 13px; max-width: 320px;">
                     <p style="margin: 0 0 4px 0; color: var(--text-muted);"><?= _e('Or enter this key manually:') ?></p>
-                    <code style="display:block; background:#f1f5f9; color:#0f172a; padding:8px; border-radius:6px; font-size:13px; word-break: break-all;"><?= htmlspecialchars($pendingSecret, ENT_QUOTES, 'UTF-8') ?></code>
+                    <code style="display:block; background: var(--bg-subtle); color: var(--text-main); padding:8px; border-radius:6px; font-size:13px; word-break: break-all;"><?= htmlspecialchars($pendingSecret, ENT_QUOTES, 'UTF-8') ?></code>
                 </div>
             </div>
             <form method="POST" action="">

@@ -2,7 +2,7 @@
 
 **Polski** | [English](../en/getsimple-plugins.md)
 
-Modo CMS zawiera **warstwę zgodności z GetSimple** (`core/GetSimpleCompat.php`). Dzięki niej wtyczki napisane dla **GetSimple CMS** działają na Modo niemal bez zmian, a jednocześnie udostępnia wygodne globalne helpery (`register_plugin`, `createSideMenu`, `i18n_merge`), z których korzystają też natywne pluginy.
+CMSbyPHP zawiera **warstwę zgodności z GetSimple** (`core/GetSimpleCompat.php`). Dzięki niej wtyczki napisane dla **GetSimple CMS** działają na CMSbyPHP niemal bez zmian, a jednocześnie udostępnia wygodne globalne helpery (`register_plugin`, `createSideMenu`, `i18n_merge`), z których korzystają też natywne pluginy.
 
 Użyj tego stylu, gdy **przenosisz istniejącą wtyczkę GetSimple** lub wolisz klasyczne API proceduralne. Dla zupełnie nowych pluginów zalecany jest [natywny styl hooków](pluginy.md).
 
@@ -25,7 +25,7 @@ Wszystkie są zdefiniowane globalnie (bez namespace), więc wtyczka GetSimple wy
 
 ## 2. Stałe środowiska
 
-| Stała | Znaczenie w Modo |
+| Stała | Znaczenie w CMSbyPHP |
 |---|---|
 | `IN_GS` | `true` — wtyczki GetSimple sądzą, że działają w GetSimple. |
 | `GSVERSION` | Zgłaszane jako `3.3.16`. |
@@ -107,7 +107,7 @@ render_admin_sidebar_icon();                  // ikona domyślna
 
 ## 5. Akcje i filtry
 
-Warstwa zgodności mapuje nazwy hooków GetSimple na hooki Modo.
+Warstwa zgodności mapuje nazwy hooków GetSimple na hooki CMSbyPHP.
 
 ### `add_action( $hook, $function, $args = [] )`
 
@@ -115,7 +115,7 @@ Warstwa zgodności mapuje nazwy hooków GetSimple na hooki Modo.
 add_action('theme-footer', 'my_plugin_footer');
 ```
 
-| Hook GetSimple | Mapowany na (Modo) |
+| Hook GetSimple | Mapowany na (CMSbyPHP) |
 |---|---|
 | `theme-header` | `theme_head` |
 | `theme-footer` | `theme_footer` |
@@ -139,14 +139,14 @@ function my_plugin_filter_content($content) {
 }
 ```
 
-| Filtr GetSimple | Mapowany na (Modo) |
+| Filtr GetSimple | Mapowany na (CMSbyPHP) |
 |---|---|
 | `content` | `the_content` |
 | `title` | `the_title` |
 | `excerpt` | `the_excerpt` |
 | *cokolwiek innego* | ta sama nazwa (przekazywane dalej) |
 
-> ⚠️ Sygnatura filtra GetSimple to `function($value)` — jeden argument. Wrapper przekazuje wyłącznie wartość; dodatkowe argumenty, które mógłby podać filtr Modo, nie są tu przekazywane. Jeśli ich potrzebujesz, subskrybuj bezpośrednio przez `Hooks::addFilter()` (patrz [natywne pluginy](pluginy.md)).
+> ⚠️ Sygnatura filtra GetSimple to `function($value)` — jeden argument. Wrapper przekazuje wyłącznie wartość; dodatkowe argumenty, które mógłby podać filtr CMSbyPHP, nie są tu przekazywane. Jeśli ich potrzebujesz, subskrybuj bezpośrednio przez `Hooks::addFilter()` (patrz [natywne pluginy](pluginy.md)).
 
 ### `exec_action()` / `exec_filter()`
 
@@ -194,7 +194,7 @@ echo i18n_r('my-gs-plugin/MYPLUGIN_TITLE');  // zwraca tekst
 i18n('my-gs-plugin/MYPLUGIN_TITLE');         // wypisuje go, z escapowaniem HTML
 ```
 
-`i18n_r()` najpierw zagląda do rejestru, potem odcina prefiks i schodzi do tłumaczenia `__()` Modo.
+`i18n_r()` najpierw zagląda do rejestru, potem odcina prefiks i schodzi do tłumaczenia `__()` CMSbyPHP.
 
 ---
 
@@ -230,7 +230,7 @@ Istnieją dla zgodności z wtyczkami przechowującymi dane jako XML (częsty wzo
 <?php
 /**
  * Plugin Name: My GS Plugin
- * Description: Wtyczka w stylu GetSimple dla Modo CMS.
+ * Description: Wtyczka w stylu GetSimple dla CMSbyPHP.
  * Version: 1.0.0
  * Author: Twoje Imię
  *

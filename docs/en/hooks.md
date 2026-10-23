@@ -2,7 +2,7 @@
 
 [Polski](../pl/hooki.md) | **English**
 
-A **hook** is a named point in the code where plugins can “plug in”. Modo CMS has two kinds:
+A **hook** is a named point in the code where plugins can “plug in”. CMSbyPHP has two kinds:
 
 * **Actions** — something happens; your function runs for its side effects. Subscribe with `Hooks::addAction($hook, $callback, $priority = 10)`.
 * **Filters** — a value is produced; your function receives it and **returns** the (possibly modified) value. Subscribe with `Hooks::addFilter($filter, $callback, $priority = 10)`.
@@ -123,7 +123,7 @@ Other code then subscribes with `addAction('myplugin_after_save', …)` / `addFi
 
 If you write in the GetSimple style, `add_action()` / `add_filter()` translate the classic names onto the hooks above. The full mapping is in [GetSimple-style plugins](getsimple-plugins.md#5-actions-and-filters). Key mappings:
 
-| GetSimple name | Modo hook |
+| GetSimple name | CMSbyPHP hook |
 |---|---|
 | `theme-header` | `theme_head` |
 | `theme-footer` | `theme_footer` |

@@ -6,7 +6,7 @@ namespace Core;
 /**
  * Class Customizer
  *
- * WordPress-style live customizer engine for Modo CMS.
+ * WordPress-style live customizer engine for CMSbyPHP.
  *
  * A single, unified schema (Panels > Sections > Controls) is assembled from
  * three cooperating sources, merged in this order (a later source overrides an

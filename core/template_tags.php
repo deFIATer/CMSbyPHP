@@ -8,7 +8,7 @@ use Core\Security;
 use Core\I18n;
 
 /**
- * Modo CMS — Theme Template Tags.
+ * CMSbyPHP — Theme Template Tags.
  *
  * These helpers extend the theme API. Every function is wrapped in a
  * function_exists() guard so this file can be loaded safely next to
@@ -39,7 +39,7 @@ if (!function_exists('get_footer')) {
  */
 if (!function_exists('get_site_title')) {
     function get_site_title(): string {
-        return Security::sanitize(Router::getOption('site_title', 'Modo CMS'));
+        return Security::sanitize(Router::getOption('site_title', 'CMSbyPHP'));
     }
 }
 

@@ -2,7 +2,7 @@
 
 **Polski** | [English](../en/installation.md)
 
-Ten przewodnik przeprowadzi Cię przez instalację Modo CMS — od wymagań po działającą stronę. Działa zarówno w **katalogu głównym domeny**, jak i w **podkatalogu**.
+Ten przewodnik przeprowadzi Cię przez instalację CMSbyPHP — od wymagań po działającą stronę. Działa zarówno w **katalogu głównym domeny**, jak i w **podkatalogu**.
 
 ---
 
@@ -82,7 +82,7 @@ Po instalacji:
 
 ### Apache
 
-Modo CMS zawiera plik `.htaccess`, który przepisuje cały ruch na `index.php`. Upewnij się, że nadpisywanie jest dozwolone, a wymagane moduły włączone.
+CMSbyPHP zawiera plik `.htaccess`, który przepisuje cały ruch na `index.php`. Upewnij się, że nadpisywanie jest dozwolone, a wymagane moduły włączone.
 
 ```apache
 <Directory /var/www/html>
@@ -162,7 +162,7 @@ Wbudowany serwer nie odczytuje `.htaccess`. Dla czystych URL-i użyj Apache/Ngin
 
 ## Kolejne kroki
 
-* [Tworzenie pluginów (natywne Modo)](pluginy.md)
+* [Tworzenie pluginów (natywne CMSbyPHP)](pluginy.md)
 * [Tworzenie wtyczek w stylu GetSimple](wtyczki.md)
 * [Funkcje motywu — referencja](funkcje-motywu.md)
 * [Hooki — referencja](hooki.md)

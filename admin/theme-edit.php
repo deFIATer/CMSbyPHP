@@ -101,13 +101,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $targetFilePath = $savePath;
                     $requestedFile = $fileToSave;
                 } else {
-                    $error = _e('File is not writable. Check file permissions.');
+                    $error = __('File is not writable. Check file permissions.');
                 }
             } else {
-                $error = _e('Invalid file extension.');
+                $error = __('Invalid file extension.');
             }
         } else {
-            $error = _e('Invalid file path.');
+            $error = __('Invalid file path.');
         }
     }
 }
@@ -137,6 +137,12 @@ require_once __DIR__ . '/views/header.php';
     font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
     font-size: 13px;
     line-height: 1.5;
+}
+@media (max-width: 640px) {
+    .CodeMirror {
+        height: 380px !important;
+        font-size: 12px !important;
+    }
 }
 </style>
 
@@ -176,7 +182,7 @@ require_once __DIR__ . '/views/header.php';
     <!-- Code Editor Section -->
     <div>
         <div class="card" style="padding: 0; overflow: hidden;">
-            <div style="background: #1e293b; color: #94a3b8; padding: 10px 16px; font-family: monospace; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155;">
+            <div style="background: var(--bg-subtle); color: var(--text-muted); padding: 10px 16px; font-family: monospace; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle);">
                 <div>
                     <span style="color: #38bdf8; font-weight: 600;"><?= htmlspecialchars($selectedTheme, ENT_QUOTES, 'UTF-8') ?>/</span><?= htmlspecialchars($requestedFile, ENT_QUOTES, 'UTF-8') ?>
                 </div>

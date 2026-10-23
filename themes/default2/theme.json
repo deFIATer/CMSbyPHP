@@ -1,9 +1,9 @@
 {
-    "name": "Modo Bootstrap Dark",
+    "name": "CMSbyPHP Bootstrap Dark",
     "slug": "default2",
     "version": "2.0.0",
-    "author": "Modo CMS",
-    "description": "Nowoczesny, ciemny motyw oparty na Bootstrap 5.3.8 (gradienty, szklane karty). Pełne wykorzystanie API motywów Modo CMS.",
+    "author": "CMSbyPHP",
+    "description": "Nowoczesny, ciemny motyw oparty na Bootstrap 5.3.8 (gradienty, szklane karty). Pełne wykorzystanie API motywów CMSbyPHP.",
     "bootstrap_version": "5.3.8",
     "files": [
         "header.php", "footer.php", "page.php", "single.php",

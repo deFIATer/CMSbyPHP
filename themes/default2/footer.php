@@ -40,7 +40,7 @@
 
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small text-secondary">
                 <span>&copy; <?= date('Y') ?> <?= site_title(false) ?>. <?= _e('All rights reserved.') ?></span>
-                <span><?= _e('Zbudowano na') ?> <strong class="text-white">Modo CMS</strong></span>
+                <span><?= _e('Zbudowano na') ?> <strong class="text-white">CMSbyPHP</strong></span>
             </div>
         </div>
     </footer>

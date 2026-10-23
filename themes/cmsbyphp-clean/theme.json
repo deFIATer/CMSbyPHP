@@ -1,0 +1,52 @@
+{
+    "name": "CMSbyPHP Clean",
+    "slug": "cmsbyphp-clean",
+    "version": "1.0.0",
+    "author": "CMSbyPHP",
+    "description": "Lekki, ultra-szybki motyw blogowy HTML5/CSS3/vanilla JS stworzony specjalnie dla bloga Czupryniak. Pełna obsługa trybu ciemnego/jasnego, wyszukiwarki na żywo, czasu czytania i paska postępu.",
+    "files": [
+        "header.php", "footer.php", "front-page.php", "archive.php",
+        "single.php", "page.php", "404.php",
+        "assets/css/style.css", "assets/js/main.js"
+    ],
+    "customize": {
+        "sections": [
+            {
+                "id": "branding",
+                "title": "Wygląd i kolory",
+                "priority": 10,
+                "controls": [
+                    {
+                        "id": "modo_accent_color",
+                        "type": "color",
+                        "label": "Główny akcent kolorystyczny",
+                        "default": "#2563eb",
+                        "css_var": "accent",
+                        "priority": 10
+                    },
+                    {
+                        "id": "modo_show_back_to_top",
+                        "type": "checkbox",
+                        "label": "Przycisk powrotu do góry",
+                        "default": "1",
+                        "priority": 20
+                    }
+                ]
+            },
+            {
+                "id": "typography",
+                "title": "Stopka",
+                "priority": 20,
+                "controls": [
+                    {
+                        "id": "modo_footer_text",
+                        "type": "text",
+                        "label": "Tekst w stopce",
+                        "default": "Osobisty blog Mateusza Czupryniaka &bull; Zasilany przez CMSbyPHP",
+                        "priority": 10
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Configures error handling, session security, PSR-4 styled class loader, database connection, and translation registry.
  */
 
-// The advanced configuration (modoconfig.php) is loaded first: it decides how
+// The advanced configuration (cmsbyphpconfig.php) is loaded first: it decides how
 // errors are handled, which timezone PHP uses and how the session cookie is
 // flagged - all of that has to happen before the session starts.
 require_once __DIR__ . '/Hooks.php';

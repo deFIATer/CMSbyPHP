@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Core {
     /**
-     * Modo CMS - GetSimple CMS Compatibility Registry
+     * CMSbyPHP - GetSimple CMS Compatibility Registry
      */
     class GSRegistry {
         public static array $registeredPlugins = [];

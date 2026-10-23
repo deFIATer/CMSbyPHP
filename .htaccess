@@ -1,6 +1,6 @@
-# ModoCMS .htaccess v3 - do not remove this line
+# CMSbyPHP .htaccess v3 - do not remove this line
 #
-# Apache / LiteSpeed rules for ModoCMS.
+# Apache / LiteSpeed rules for CMSbyPHP.
 # The same file works in the document root (https://domain/) and inside a
 # subfolder (https://domain/subfolder/): RewriteBase is intentionally NOT set,
 # Apache derives the base path from the directory holding this file.
@@ -40,7 +40,7 @@ DirectoryIndex index.php
 # 3. Block sensitive files: databases, logs, backups, configuration and
 #    version-control / editor leftovers
 # ---------------------------------------------------------------------------
-<FilesMatch "(^\..*|\.sqlite.*|\.(sqlite3|db|sql|log|ini|json|lock|bak|orig|old|dist)$|^(modoconfig\.php|modoconfig\.sample\.php|composer\.json|composer\.lock|phpunit\.xml|php\.ini)$)">
+<FilesMatch "(^\..*|\.sqlite.*|\.(sqlite3|db|sql|log|ini|json|lock|bak|orig|old|dist)$|^(cmsbyphpconfig\.php|cmsbyphpconfig\.sample\.php|modoconfig\.php|modoconfig\.sample\.php|composer\.json|composer\.lock|phpunit\.xml|php\.ini)$)">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>
@@ -67,6 +67,35 @@ RedirectMatch 403 ^.*/node_modules/.*$
 # ---------------------------------------------------------------------------
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# 5b. Browser Caching (Expires headers for static assets)
+# ---------------------------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+    
+    # CSS & JavaScript
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    
+    # Images & Media
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresByType video/mp4 "access plus 1 year"
+    ExpiresByType video/webm "access plus 1 year"
+    ExpiresByType audio/mpeg "access plus 1 year"
+    
+    # Fonts
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
 </IfModule>
 
 # ---------------------------------------------------------------------------

@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
     $form = ['id' => $snippetId, 'name' => $name, 'label' => $label, 'content' => $content, 'enabled' => $enabled];
 
     if ($name === '') {
-        $message = 'Name is required.';
+        $message = __('Name is required.');
         $messageType = 'danger';
     } else {
         try {
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
             header('Location: snippets.php?edit=' . $snippetId . '&saved=1');
             exit;
         } catch (\PDOException $e) {
-            $message = 'A snippet with that name already exists.';
+            $message = __('A snippet with that name already exists.');
             $messageType = 'danger';
         }
     }
@@ -286,13 +286,13 @@ document.querySelectorAll('.copy-shortcode').forEach(function (btn) {
     #snippet-editorjs {
         padding: 20px 16px 20px;
         min-height: 300px;
-        background: #ffffff;
-        color: #0f172a;
-        border: 1px solid #e2e8f0;
+        background: var(--input-bg);
+        color: var(--text-main);
+        border: 1px solid var(--border-subtle);
         border-radius: var(--radius-sm, 8px);
     }
     #snippet-editorjs .ce-block__content, #snippet-editorjs .ce-toolbar__content { max-width: 100%; }
-    #snippet-editorjs .cdx-block { font-size: 14px; line-height: 1.6; color: #0f172a; }
+    #snippet-editorjs .cdx-block { font-size: 14px; line-height: 1.6; color: var(--text-main); }
     #snippet-editorjs [data-placeholder]:empty::before { color: #94a3b8; }
     #snippet-editorjs .modo-image img { max-width: 100%; height: auto; }
 </style>

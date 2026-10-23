@@ -1,6 +1,6 @@
-# Modo Editorial (`editorial`) — motyw Modo CMS
+# CMSbyPHP Editorial (`editorial`) — motyw CMSbyPHP
 
-Magazynowy, responsywny motyw dla Modo CMS oparty na **Bootstrap 5.3.8**
+Magazynowy, responsywny motyw dla CMSbyPHP oparty na **Bootstrap 5.3.8**
 z serifowymi nagłówkami (Playfair Display) i wyróżnionym wpisem na liście.
 
 ## Instalacja

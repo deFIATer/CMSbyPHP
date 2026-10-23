@@ -1,14 +1,14 @@
-# Tworzenie pluginów (natywne Modo)
+# Tworzenie pluginów (natywne CMSbyPHP)
 
 **Polski** | [English](../en/plugins.md)
 
-To przystępny przewodnik po pisaniu **natywnych pluginów Modo** z użyciem systemu hooków. Jeśli przenosisz istniejącą wtyczkę GetSimple, zobacz [Wtyczki w stylu GetSimple](wtyczki.md).
+To przystępny przewodnik po pisaniu **natywnych pluginów CMSbyPHP** z użyciem systemu hooków. Jeśli przenosisz istniejącą wtyczkę GetSimple, zobacz [Wtyczki w stylu GetSimple](wtyczki.md).
 
 ---
 
 ## 1. Czym jest plugin?
 
-Plugin to mały plik PHP (lub folder), który **dodaje nowe zachowanie do Modo CMS bez modyfikowania rdzenia**. Wrzucasz go do katalogu `plugins/`, włączasz w panelu i zaczyna działać.
+Plugin to mały plik PHP (lub folder), który **dodaje nowe zachowanie do CMSbyPHP bez modyfikowania rdzenia**. Wrzucasz go do katalogu `plugins/`, włączasz w panelu i zaczyna działać.
 
 Wyobraź sobie CMS jako dom z **gniazdkami** (zwanymi *hookami*) w ścianach:
 
@@ -137,7 +137,7 @@ Utwórz `plugins/hello-world.php`:
 <?php
 /**
  * Plugin Name: Hello World Filter
- * Description: Demonstruje hooki i filtrowanie treści w Modo CMS.
+ * Description: Demonstruje hooki i filtrowanie treści w CMSbyPHP.
  *
  * @package HelloWorld
  */
@@ -150,7 +150,7 @@ Hooks::addFilter('the_content', function (string $content): string {
     if (defined('IN_ADMIN') && IN_ADMIN === true) {
         return $content;
     }
-    return $content . '<p style="color:#64748b;font-style:italic;">Powered by Modo CMS</p>';
+    return $content . '<p style="color:#64748b;font-style:italic;">Powered by CMSbyPHP</p>';
 });
 ```
 

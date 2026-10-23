@@ -63,7 +63,7 @@ if (!function_exists('webp_url')) {
 
 // Site Details
 function site_title(bool $echo = true): string {
-    $val = Hooks::applyFilters('site_title', Router::getOption('site_title', 'Modo CMS'));
+    $val = Hooks::applyFilters('site_title', Router::getOption('site_title', 'CMSbyPHP'));
     if ($echo) echo htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
     return $val;
 }
@@ -633,7 +633,7 @@ function lang_switch(string $cssClass = 'lang-switcher'): void {
 
 function theme_head(): void {
     $seo = ThemeState::$seoPayload;
-    $title = $seo['title'] ?? Router::getOption('site_title', 'Modo CMS');
+    $title = $seo['title'] ?? Router::getOption('site_title', 'CMSbyPHP');
     $desc = $seo['description'] ?? Router::getOption('site_description', '');
 
     // Resolve OpenGraph Image (page featured image or fallback global setting)
@@ -651,7 +651,7 @@ function theme_head(): void {
 
     // Resolve Favicon
     $favicon = Router::getOption('site_favicon', '');
-    $ogSiteName = Router::getOption('og_site_name', Router::getOption('site_title', 'Modo CMS'));
+    $ogSiteName = Router::getOption('og_site_name', Router::getOption('site_title', 'CMSbyPHP'));
 
     // Resolve the canonical URL for the current request (uses the configured domain when set)
     $basePrefix = class_exists('Core\\Router') ? Router::getBaseSubdirectory() : '';
@@ -663,6 +663,10 @@ function theme_head(): void {
         $requestPath = '/' . ltrim($requestPath, '/');
     }
     $canonicalUrl = rtrim(Router::getSiteUrl(), '/') . $requestPath;
+
+    echo '<meta name="generator" content="CMSbyPHP 1.0">' . PHP_EOL;
+    $rssFeedUrl = rtrim(Router::getSiteUrl(), '/') . '/feed';
+    echo '<link rel="alternate" type="application/rss+xml" title="' . htmlspecialchars(Router::getOption('site_title', 'CMSbyPHP'), ENT_QUOTES, 'UTF-8') . ' RSS Feed" href="' . htmlspecialchars($rssFeedUrl, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL;
 
     // Output metadata
     echo '<title>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>' . PHP_EOL;
@@ -719,4 +723,82 @@ function theme_footer(): void {
 
     Hooks::doAction('theme_footer');
     Hooks::doAction('theme-footer');
+}
+
+/**
+ * CMSbyPHP Helper Functions
+ */
+
+function calculate_reading_time(?string $content = null, int $wpm = 200): int {
+    $text = strip_tags($content ?? (ThemeState::$currentPage['content'] ?? ''));
+    $words = str_word_count($text);
+    return max(1, (int) ceil($words / $wpm));
+}
+
+function reading_time(?string $content = null, bool $echo = true): string {
+    $mins = calculate_reading_time($content);
+    $text = $mins . ' min czytania';
+    if ($echo) echo $text;
+    return $text;
+}
+
+function get_adjacent_posts(?int $postId = null): array {
+    $id = $postId ?? (ThemeState::$currentPage['id'] ?? 0);
+    if (!$id) return ['prev' => null, 'next' => null];
+
+    $db = Database::getConnection();
+    $currentDate = ThemeState::$currentPage['created_at'] ?? date('Y-m-d H:i:s');
+
+    // Poprzedni (starszy wpis)
+    $stmtPrev = $db->prepare("
+        SELECT id, title, slug, created_at, featured_image 
+        FROM pages 
+        WHERE type = 'post' AND status = 'published' AND created_at < :dt 
+        ORDER BY created_at DESC 
+        LIMIT 1
+    ");
+    $stmtPrev->execute([':dt' => $currentDate]);
+    $prev = $stmtPrev->fetch() ?: null;
+
+    // Następny (nowszy wpis)
+    $stmtNext = $db->prepare("
+        SELECT id, title, slug, created_at, featured_image 
+        FROM pages 
+        WHERE type = 'post' AND status = 'published' AND created_at > :dt 
+        ORDER BY created_at ASC 
+        LIMIT 1
+    ");
+    $stmtNext->execute([':dt' => $currentDate]);
+    $next = $stmtNext->fetch() ?: null;
+
+    return ['prev' => $prev, 'next' => $next];
+}
+
+function get_categories_with_counts(): array {
+    $db = Database::getConnection();
+    $stmt = $db->query("
+        SELECT c.id, c.name, c.slug, c.description, COUNT(pc.page_id) as post_count
+        FROM categories c
+        LEFT JOIN page_categories pc ON pc.category_id = c.id
+        LEFT JOIN pages p ON p.id = pc.page_id AND p.status = 'published' AND p.type = 'post'
+        GROUP BY c.id
+        ORDER BY c.name ASC
+    ");
+    return $stmt->fetchAll() ?: [];
+}
+
+function get_popular_tags(int $limit = 10): array {
+    $db = Database::getConnection();
+    $stmt = $db->prepare("
+        SELECT t.id, t.name, t.slug, COUNT(pt.page_id) as post_count
+        FROM tags t
+        JOIN page_tags pt ON pt.tag_id = t.id
+        JOIN pages p ON p.id = pt.page_id AND p.status = 'published' AND p.type = 'post'
+        GROUP BY t.id
+        ORDER BY post_count DESC, t.name ASC
+        LIMIT :lim
+    ");
+    $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll() ?: [];
 }

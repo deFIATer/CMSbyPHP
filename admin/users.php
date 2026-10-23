@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             ]);
             $message = __('User added successfully.');
         } catch (\PDOException $e) {
-            $message = 'Username or email already exists.';
+            $message = __('Username or email already exists.');
         }
     } else {
         $message = __('Password must be at least 6 characters.');
@@ -47,7 +47,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
             header('Location: users.php');
             exit;
         } else {
-            $message = 'You cannot delete your own account.';
+            $message = __('You cannot delete your own account.');
         }
     }
 }
@@ -79,7 +79,15 @@ require_once __DIR__ . '/views/header.php';
                     <tr>
                         <td><strong><?= Security::sanitize($u['username']) ?></strong></td>
                         <td style="color: var(--text-muted);"><?= Security::sanitize($u['email']) ?></td>
-                        <td><span class="badge <?= $u['role'] === 'admin' ? 'badge-warning' : 'badge-success' ?>"><?= strtoupper(Security::sanitize($u['role'])) ?></span></td>
+                        <?php
+                            $roleMap = [
+                                'admin' => __('Administrator'),
+                                'editor' => __('Editor'),
+                                'author' => __('Author')
+                            ];
+                            $displayRole = $roleMap[$u['role']] ?? ucfirst($u['role']);
+                        ?>
+                        <td><span class="badge <?= $u['role'] === 'admin' ? 'badge-warning' : 'badge-success' ?>"><?= mb_strtoupper(Security::sanitize($displayRole)) ?></span></td>
                         <td style="color: var(--text-muted); font-size: 12px;"><?= $u['created_at'] ?></td>
                         <td style="text-align: right;">
                             <?php if ($u['id'] !== Auth::id()): ?>
@@ -91,7 +99,7 @@ require_once __DIR__ . '/views/header.php';
                                    data-confirm-ok="<?= _e('Delete') ?>"
                                    data-confirm-danger><?= _e('Delete') ?></a>
                             <?php else: ?>
-                                <span style="color: var(--text-muted); font-size: 12px;">(You)</span>
+                                <span style="color: var(--text-muted); font-size: 12px;">(<?= _e('You') ?>)</span>
                             <?php endif; ?>
                         </td>
                     </tr>

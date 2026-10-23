@@ -4,4 +4,4 @@ Disallow: /admin/
 Disallow: /core/
 Disallow: /uploads/cache/
 
-Sitemap: http://localhost/modocms/sitemap.xml
+Sitemap: http://localhost/sitemap.xml

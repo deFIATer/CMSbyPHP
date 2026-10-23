@@ -1,5 +1,5 @@
 /* =============================================================
-   Modo CMS — landing interactions
+   CMSbyPHP — landing interactions
    - PL/EN i18n with localStorage
    - scroll reveal, animated counters, mobile nav,
      copy-to-clipboard, card pointer glow
@@ -32,7 +32,7 @@
       'hero.tag4': 'Licencja MIT',
       'hero.autosave': 'Zapisano',
       'hero.crumb': 'Strony / Strona główna',
-      'hero.titletxt': 'Witamy w Modo CMS',
+      'hero.titletxt': 'Witamy w CMSbyPHP',
       'hero.plugin': 'Wtyczka aktywna',
 
       'panel.eyebrow': 'Panel administratora',
@@ -103,7 +103,7 @@
       'doc1.title': 'Instalacja',
       'doc1.desc': 'Root, podkatalog, Apache/Nginx i rozwiązywanie problemów.',
       'doc2.title': 'Tworzenie pluginów',
-      'doc2.desc': 'Natywne pluginy Modo krok po kroku, z akcjami i filtrami.',
+      'doc2.desc': 'Natywne pluginy CMSbyPHP krok po kroku, z akcjami i filtrami.',
       'doc3.title': 'Wtyczki GetSimple',
       'doc3.desc': 'Warstwa zgodności: register_plugin, sidebar, i18n.',
       'doc4.title': 'Funkcje motywu',
@@ -114,8 +114,8 @@
       'doc6.desc': 'Gotowe wtyczki i fragmenty motywu do skopiowania.',
 
       'cta.title': 'Gotowy zbudować coś lekkiego?',
-      'cta.sub': 'Pobierz Modo CMS, przeczytaj dokumentację i postaw własną witrynę na PHP 8 i SQLite3 — bez bazy do konfiguracji i bez zewnętrznych zależności.',
-      'cta.btn1': 'Pobierz Modo CMS',
+      'cta.sub': 'Pobierz CMSbyPHP, przeczytaj dokumentację i postaw własną witrynę na PHP 8 i SQLite3 — bez bazy do konfiguracji i bez zewnętrznych zależności.',
+      'cta.btn1': 'Pobierz CMSbyPHP',
       'cta.btn2': 'Przeczytaj dokumentację',
 
       'footer.about': 'Lekki, szybki i modułowy system zarządzania treścią na PHP 8 i SQLite3. Zbudowany dla ludzi, którzy chcą pełnej kontroli nad kodem.',
@@ -147,7 +147,7 @@
       'hero.tag4': 'MIT licensed',
       'hero.autosave': 'Saved',
       'hero.crumb': 'Pages / Home',
-      'hero.titletxt': 'Welcome to Modo CMS',
+      'hero.titletxt': 'Welcome to CMSbyPHP',
       'hero.plugin': 'Plugin active',
 
       'panel.eyebrow': 'Admin panel',
@@ -218,7 +218,7 @@
       'doc1.title': 'Installation',
       'doc1.desc': 'Root, subdirectory, Apache/Nginx and troubleshooting.',
       'doc2.title': 'Creating plugins',
-      'doc2.desc': 'Native Modo plugins step by step, with actions and filters.',
+      'doc2.desc': 'Native CMSbyPHP plugins step by step, with actions and filters.',
       'doc3.title': 'GetSimple plugins',
       'doc3.desc': 'Compatibility layer: register_plugin, sidebar, i18n.',
       'doc4.title': 'Theme functions',
@@ -229,8 +229,8 @@
       'doc6.desc': 'Ready-to-copy plugins and theme snippets.',
 
       'cta.title': 'Ready to build something lightweight?',
-      'cta.sub': 'Download Modo CMS, read the docs and launch your own site on PHP 8 and SQLite3 — with no database to configure and no external dependencies.',
-      'cta.btn1': 'Download Modo CMS',
+      'cta.sub': 'Download CMSbyPHP, read the docs and launch your own site on PHP 8 and SQLite3 — with no database to configure and no external dependencies.',
+      'cta.btn1': 'Download CMSbyPHP',
       'cta.btn2': 'Read the documentation',
 
       'footer.about': 'A lightweight, fast and modular content management system built on PHP 8 and SQLite3. Made for people who want full control over their code.',
@@ -245,12 +245,12 @@
 
   var META = {
     pl: {
-      title: 'Modo CMS — lekki, modułowy CMS na PHP 8 i SQLite3',
-      desc: 'Modo CMS to lekki, szybki i modułowy system zarządzania treścią na PHP 8 i SQLite3. Zero konfiguracji bazy, zero CDN, pełna kontrola nad motywem i wtyczkami. Licencja MIT.'
+      title: 'CMSbyPHP — lekki, modułowy CMS na PHP 8 i SQLite3',
+      desc: 'CMSbyPHP to lekki, szybki i modułowy system zarządzania treścią na PHP 8 i SQLite3. Zero konfiguracji bazy, zero CDN, pełna kontrola nad motywem i wtyczkami. Licencja MIT.'
     },
     en: {
-      title: 'Modo CMS — a lightweight modular CMS on PHP 8 & SQLite3',
-      desc: 'Modo CMS is a lightweight, fast and modular content management system built on PHP 8 and SQLite3. No database setup, no CDN, full control over your theme and plugins. MIT licensed.'
+      title: 'CMSbyPHP — a lightweight modular CMS on PHP 8 & SQLite3',
+      desc: 'CMSbyPHP is a lightweight, fast and modular content management system built on PHP 8 and SQLite3. No database setup, no CDN, full control over your theme and plugins. MIT licensed.'
     }
   };
 
@@ -263,7 +263,7 @@
     hooks: { pl: 'docs/pl/hooki.md', en: 'docs/en/hooks.md' },
     examples: { pl: 'docs/pl/przyklady.md', en: 'docs/en/examples.md' }
   };
-  var REPO_BLOB = 'https://github.com/multicolor-rgb/ModoCMS/blob/3.0/';
+  var REPO_BLOB = 'https://github.com/multicolor-rgb/CMSbyPHP/blob/3.0/';
 
   var STORAGE_KEY = 'modo-lang';
   var currentLang = 'pl';

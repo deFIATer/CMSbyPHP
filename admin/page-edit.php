@@ -410,25 +410,45 @@ function resolveParentPath(int $parentId, array $lookup): string {
     return !empty($slugs) ? implode('/', $slugs) . '/' : '';
 }
 
-// Uploads lookup
-$uploadsDir = dirname(__DIR__) . '/uploads/';
+// Uploads and media lookup
 $basePrefix = class_exists('Core\Router') ? Router::getBaseSubdirectory() : '';
 $existingMedia = [];
 
-if (is_dir($uploadsDir)) {
-    $files = scandir($uploadsDir, SCANDIR_SORT_DESCENDING) ?: [];
-    foreach ($files as $file) {
-        if ($file === '.' || $file === '..') continue;
-        $filePath = $uploadsDir . $file;
-        if (!is_file($filePath)) continue;
-
-        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif'], true)) {
-            $webPath = ($basePrefix !== '' ? rtrim($basePrefix, '/') : '') . '/uploads/' . $file;
+try {
+    $mediaStmt = $db->query("SELECT id, filename, filepath, mime_type, is_private FROM media ORDER BY id DESC");
+    if ($mediaStmt) {
+        foreach ($mediaStmt->fetchAll(PDO::FETCH_ASSOC) as $mRow) {
             $existingMedia[] = [
-                'name' => $file,
-                'url'  => $webPath
+                'id'         => (int)$mRow['id'],
+                'name'       => $mRow['filename'],
+                'url'        => \Core\ProtectedMedia::getAccessUrl($mRow, false),
+                'is_private' => !empty($mRow['is_private']),
+                'mime_type'  => $mRow['mime_type'] ?? ''
             ];
+        }
+    }
+} catch (\Throwable $e) {}
+
+if (empty($existingMedia)) {
+    $uploadsDir = dirname(__DIR__) . '/uploads/';
+    if (is_dir($uploadsDir)) {
+        $files = scandir($uploadsDir, SCANDIR_SORT_DESCENDING) ?: [];
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..' || str_starts_with($file, '.')) continue;
+            $filePath = $uploadsDir . $file;
+            if (!is_file($filePath)) continue;
+
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif'], true)) {
+                $webPath = ($basePrefix !== '' ? rtrim($basePrefix, '/') : '') . '/uploads/' . $file;
+                $existingMedia[] = [
+                    'id'         => 0,
+                    'name'       => $file,
+                    'url'        => $webPath,
+                    'is_private' => false,
+                    'mime_type'  => 'image/' . $ext
+                ];
+            }
         }
     }
 }
@@ -481,6 +501,31 @@ require_once __DIR__ . '/views/header.php';
 @media (max-width: 1080px) {
     .editor-layout {
         grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+@media (max-width: 768px) {
+    .mobile-editor-sticky-bar {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--bg-surface);
+        border-top: 1px solid var(--border-subtle);
+        padding: 10px 16px;
+        padding-bottom: max(10px, env(safe-area-inset-bottom, 0));
+        gap: 10px;
+        z-index: 150;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+    }
+    .permalink-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 6px !important;
+    }
+    .permalink-prefix {
+        word-break: break-all;
     }
 }
 
@@ -489,7 +534,7 @@ require_once __DIR__ . '/views/header.php';
     font-weight: 700 !important;
     padding: 14px 18px !important;
     border-radius: var(--radius-md, 10px) !important;
-    background: var(--bg-surface, #1e293b) !important;
+    background: var(--input-bg) !important;
     border: 1px solid var(--border-subtle) !important;
     color: var(--text-main) !important;
     transition: all 0.2s ease;
@@ -503,7 +548,7 @@ require_once __DIR__ . '/views/header.php';
 .permalink-bar {
     display: flex;
     align-items: center;
-    background: var(--bg-surface, #1e293b);
+    background: var(--bg-subtle);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm, 8px);
     padding: 6px 12px;
@@ -543,7 +588,7 @@ require_once __DIR__ . '/views/header.php';
     position: relative;
     border: 2px dashed var(--border-subtle);
     border-radius: var(--radius-md, 10px);
-    background: var(--bg-surface, #1e293b);
+    background: var(--bg-subtle);
     overflow: hidden;
     transition: all 0.2s ease;
     text-align: center;
@@ -575,7 +620,7 @@ require_once __DIR__ . '/views/header.php';
     letter-spacing: 0.04em;
     border-radius: 9999px;
     text-decoration: none;
-    background: var(--bg-surface, #1e293b);
+    background: var(--bg-subtle);
     border: 1px solid var(--border-subtle);
     color: var(--text-muted);
     transition: all 0.15s ease;
@@ -614,13 +659,13 @@ require_once __DIR__ . '/views/header.php';
     #editorjs {
         padding: 24px 20px 40px;
         min-height: 420px;
-        background: #ffffff;
-        color: #0f172a;
-        border: 1px solid #e2e8f0;
+        background: var(--input-bg);
+        color: var(--text-main);
+        border: 1px solid var(--border-subtle);
         border-radius: var(--radius-sm, 8px);
     }
     #editorjs .ce-block__content, #editorjs .ce-toolbar__content { max-width: 100%; }
-    #editorjs .cdx-block { font-size: 15px; line-height: 1.65; color: #0f172a; }
+    #editorjs .cdx-block { font-size: 15px; line-height: 1.65; color: var(--text-main); }
     #editorjs [data-placeholder]:empty::before { color: #94a3b8; }
     #editorjs .modo-image img { max-width: 100%; height: auto; }
 </style>
@@ -681,15 +726,29 @@ require_once __DIR__ . '/views/header.php';
 <div class="page-header" style="margin-bottom: 24px;">
     <div>
         <h1 class="page-title" style="display: flex; align-items: center; gap: 10px;">
-            <span><?= $id > 0 ? _e('Edit') . ': ' . Security::sanitize($item['title']) : _e('New Document') ?></span>
-            <span class="badge" style="font-size: 12px; background: var(--bg-surface, #1e293b); border: 1px solid var(--border-subtle); color: var(--accent, #60a5fa); text-transform: uppercase;">
-                <?= $item['type'] === 'post' ? _e('Blog Post') : _e('Static Page') ?>
-            </span>
+            <?php if ($item['type'] === 'post'): ?>
+                <span><?= $id > 0 ? _e('Edit Post') . ': ' . Security::sanitize($item['title']) : _e('New Post') ?></span>
+                <span class="badge" style="font-size: 11px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--primary); text-transform: uppercase;">
+                    <?= _e('Blog Post') ?>
+                </span>
+            <?php else: ?>
+                <span><?= $id > 0 ? _e('Edit Page') . ': ' . Security::sanitize($item['title']) : _e('New Page') ?></span>
+                <span class="badge" style="font-size: 11px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); color: var(--text-muted); text-transform: uppercase;">
+                    <?= _e('Static Page') ?>
+                </span>
+            <?php endif; ?>
         </h1>
-        <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0 0;"><?= _e('Manage page content, parent hierarchy, and SEO meta tags') ?></p>
+        <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0 0;">
+            <?= $item['type'] === 'post' ? _e('Manage blog post content, categories, tags, and SEO settings') : _e('Manage static page content, parent hierarchy, and SEO meta tags') ?>
+        </p>
     </div>
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <a href="pages.php" class="btn btn-secondary">&larr; <?= _e('Content') ?></a>
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <?php if ($item['type'] === 'post'): ?>
+            <a href="posts.php" class="btn btn-secondary">&larr; <?= _e('Posts') ?></a>
+        <?php else: ?>
+            <a href="pages.php" class="btn btn-secondary">&larr; <?= _e('Pages') ?></a>
+        <?php endif; ?>
+        <button type="submit" form="page-edit-form" class="btn btn-primary" style="padding: 8px 16px; font-weight: 600;">💾 <?= _e('Save') ?></button>
     </div>
 </div>
 
@@ -708,7 +767,7 @@ require_once __DIR__ . '/views/header.php';
     </div>
 <?php endif; ?>
 
-<form method="POST" action="">
+<form method="POST" action="" id="page-edit-form">
     <input type="hidden" name="csrf_token" value="<?= Security::generateCsrfToken() ?>">
 
     <div class="editor-layout">
@@ -725,6 +784,9 @@ require_once __DIR__ . '/views/header.php';
                         <span class="permalink-prefix" id="parent-slug-prefix"><?= htmlspecialchars($baseUrl, ENT_QUOTES, 'UTF-8') ?>/</span>
                         <input class="permalink-input" type="text" id="slug" name="slug" value="<?= Security::sanitize($item['slug']) ?>" placeholder="slug-name" autocomplete="off">
                         <div class="permalink-actions">
+                            <button type="button" class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="generatePolishSlug()" title="Wygeneruj slug z tytułu (obsługa polskich znaków)">
+                                ⚡ Auto-slug
+                            </button>
                             <button type="button" class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="copyLiveUrl(this)" title="<?= _e('Copy link') ?>">
                                 <?= _e('Copy') ?>
                             </button>
@@ -743,6 +805,10 @@ require_once __DIR__ . '/views/header.php';
                     <?php else: ?>
                         <textarea id="editor" name="content"><?= htmlspecialchars($item['content'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                     <?php endif; ?>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12px; color: var(--text-muted); padding: 4px 2px;">
+                        <span id="live-word-count">📊 Licznik słów: <strong>0</strong></span>
+                        <span id="live-read-time">⏱️ Szacowany czas czytania: <strong>~1 min</strong></span>
+                    </div>
                 </div>
             </div>
 
@@ -831,7 +897,7 @@ require_once __DIR__ . '/views/header.php';
                     <span style="font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
                         <svg style="width: 18px; height: 18px; color: var(--primary);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <?= _e('Revision History') ?>
-                        <span id="revisions-count" class="badge" style="font-size: 11px; background: var(--bg-surface, #1e293b); border: 1px solid var(--border-subtle); color: var(--text-muted);"><?= (int) $revisionCount ?></span>
+                        <span id="revisions-count" class="badge" style="font-size: 11px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); color: var(--text-muted);"><?= (int) $revisionCount ?></span>
                     </span>
                     <svg id="revisions-chevron" style="width: 16px; height: 16px; color: var(--text-muted); transition: transform .2s;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </button>
@@ -929,7 +995,7 @@ require_once __DIR__ . '/views/header.php';
                         <a href="categories.php" class="btn btn-secondary" style="margin-top: 6px; padding: 4px 10px; font-size: 11px;"><?= _e('Manage Categories') ?></a>
                     <?php else: ?>
                         <input class="form-control" type="text" id="category-filter" placeholder="<?= _e('Filter categories...') ?>" style="margin-bottom: 8px; font-size: 12px;">
-                        <div id="category-checkbox-list" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 8px); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; background: var(--bg-surface, #1e293b);">
+                        <div id="category-checkbox-list" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 8px); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; background: var(--bg-subtle);">
                             <?php foreach ($allCategories as $category): ?>
                                 <label class="category-option" style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; margin: 0;">
                                     <input type="checkbox" name="categories[]" value="<?= (int) $category['id'] ?>" <?= in_array((int) $category['id'], $assignedCategoryIds, true) ? 'checked' : '' ?>>
@@ -1011,8 +1077,18 @@ require_once __DIR__ . '/views/header.php';
     </div>
 </form>
 
-<div id="media-modal" style="display: none; position: fixed; inset: 0; background: rgba(11, 15, 25, 0.8); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-    <div class="card" style="width: 90%; max-width: 860px; max-height: 85vh; padding: 0; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); overflow: hidden; background: var(--bg-card, #111827); border: 1px solid var(--border-subtle);">
+<!-- Mobile Sticky Bottom Actions Bar -->
+<div class="mobile-editor-sticky-bar" style="display: none;">
+    <button type="submit" form="page-edit-form" class="btn btn-primary" style="flex: 1; padding: 12px; font-weight: 600; font-size: 14px;">💾 <?= _e('Save Changes') ?></button>
+    <?php if ($item['type'] === 'post'): ?>
+        <a href="posts.php" class="btn btn-secondary" style="padding: 12px 16px; font-size: 13px;"><?= _e('Cancel') ?></a>
+    <?php else: ?>
+        <a href="pages.php" class="btn btn-secondary" style="padding: 12px 16px; font-size: 13px;"><?= _e('Cancel') ?></a>
+    <?php endif; ?>
+</div>
+
+<div id="media-modal" style="display: none; position: fixed; inset: 0; background: var(--modal-overlay); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+    <div class="card" style="width: 90%; max-width: 860px; max-height: 85vh; padding: 0; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); overflow: hidden; background: var(--modal-bg); border: 1px solid var(--border-subtle);">
         <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
             <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
                 <svg style="width: 20px; height: 20px; color: var(--primary);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -1027,9 +1103,25 @@ require_once __DIR__ . '/views/header.php';
                 </div>
             <?php else: ?>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 16px;">
-                    <?php foreach ($existingMedia as $media): ?>
-                        <div class="media-pick-item" data-url="<?= htmlspecialchars($media['url'], ENT_QUOTES, 'UTF-8') ?>" style="cursor: pointer; border: 2px solid transparent; border-radius: var(--radius-sm, 8px); overflow: hidden; background: var(--bg-surface, #1e293b); transition: all 0.2s ease;">
-                            <img src="<?= htmlspecialchars($media['url'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($media['name'], ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($media['name'], ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; height: 110px; object-fit: cover; display: block;">
+                    <?php foreach ($existingMedia as $media): 
+                        $isImg = str_starts_with($media['mime_type'], 'image/') && empty($media['is_private']);
+                    ?>
+                        <div class="media-pick-item" data-url="<?= htmlspecialchars($media['url'], ENT_QUOTES, 'UTF-8') ?>" style="cursor: pointer; border: 2px solid transparent; border-radius: var(--radius-sm, 8px); overflow: hidden; background: var(--bg-subtle); transition: all 0.2s ease; position: relative;">
+                            <?php if (!empty($media['is_private'])): ?>
+                                <span style="position: absolute; top: 6px; left: 6px; background: rgba(245, 158, 11, 0.9); color: #fff; font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 4px; z-index: 2;">🔒 Hasło</span>
+                            <?php endif; ?>
+                            <?php if ($isImg): ?>
+                                <img src="<?= htmlspecialchars($media['url'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($media['name'], ENT_QUOTES, 'UTF-8') ?>" title="<?= htmlspecialchars($media['name'], ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; height: 105px; object-fit: cover; display: block;">
+                            <?php else: ?>
+                                <div style="width: 100%; height: 105px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.15);">
+                                    <span style="font-size: 28px;">
+                                        <?= str_starts_with($media['mime_type'], 'video/') ? '🎬' : (str_starts_with($media['mime_type'], 'audio/') ? '🎵' : ($media['mime_type'] === 'application/pdf' ? '📄' : '📁')) ?>
+                                    </span>
+                                    <span style="font-size: 10px; font-weight: 600; color: var(--text-muted); margin-top: 4px; text-transform: uppercase;">
+                                        <?= pathinfo($media['name'], PATHINFO_EXTENSION) ?: 'PLIK' ?>
+                                    </span>
+                                </div>
+                            <?php endif; ?>
                             <div style="font-size: 11px; padding: 6px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; color: var(--text-muted);">
                                 <?= Security::sanitize($media['name']) ?>
                             </div>
@@ -1038,7 +1130,7 @@ require_once __DIR__ . '/views/header.php';
                 </div>
             <?php endif; ?>
         </div>
-        <div style="padding: 14px 24px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; background: var(--bg-surface, #1e293b);">
+        <div style="padding: 14px 24px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; background: var(--modal-bg);">
             <button type="button" id="cancel-modal-btn" class="btn btn-secondary" style="font-size: 13px;"><?= _e('Close') ?></button>
         </div>
     </div>
@@ -1099,18 +1191,63 @@ function copyLiveUrl(btn) {
     });
 }
 
+function polishTransliterateSlug(str) {
+    if (!str) return '';
+    const pl = {'ą':'a','ć':'c','ę':'e','ł':'l','ń':'n','ó':'o','ś':'s','ź':'z','ż':'z','Ą':'a','Ć':'c','Ę':'e','Ł':'l','Ń':'n','Ó':'o','Ś':'s','Ź':'z','Ż':'z'};
+    const clean = str.replace(/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/g, m => pl[m] || m);
+    return clean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+function generatePolishSlug() {
+    if (!titleInput || !slugInput) return;
+    const generated = polishTransliterateSlug(titleInput.value);
+    if (generated) {
+        slugInput.value = generated;
+        slugInput.dataset.manual = '1';
+        updateHierarchicalSlugPreview();
+    }
+}
+
 if (titleInput) {
     titleInput.addEventListener('input', () => {
         if (<?= $id === 0 ? 'true' : 'false' ?> && slugInput && slugInput.dataset.manual !== '1') {
-            const auto = titleInput.value.toLowerCase()
-                .replace(/[^\w\s-]/g, '')
-                .replace(/[\s_-]+/g, '-')
-                .replace(/^-+|-+$/g, '');
-            slugInput.value = auto;
+            slugInput.value = polishTransliterateSlug(titleInput.value);
         }
         updateHierarchicalSlugPreview();
     });
 }
+
+// Live Word Count & Reading Time Updater
+function updateContentStats() {
+    const editorEl = document.getElementById('editor');
+    if (!editorEl) return;
+    let text = '';
+    if (window.tinymce && tinymce.get('editor')) {
+        text = tinymce.get('editor').getContent({ format: 'text' }) || '';
+    } else {
+        text = editorEl.value.replace(/<[^>]*>/g, ' ');
+    }
+    const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+    const readMinutes = Math.max(1, Math.ceil(words / 200));
+
+    const wcEl = document.getElementById('live-word-count');
+    const rtEl = document.getElementById('live-read-time');
+    if (wcEl) wcEl.innerHTML = '📊 Licznik słów: <strong>' + words + '</strong>';
+    if (rtEl) rtEl.innerHTML = '⏱️ Szacowany czas czytania: <strong>~' + readMinutes + ' min</strong>';
+}
+
+setTimeout(() => {
+    updateContentStats();
+    const editorTextarea = document.getElementById('editor');
+    if (editorTextarea) {
+        editorTextarea.addEventListener('input', updateContentStats);
+    }
+    if (window.tinymce) {
+        tinymce.on('AddEditor', (e) => {
+            e.editor.on('input change keyup', updateContentStats);
+        });
+    }
+}, 800);
 
 if (slugInput) {
     slugInput.addEventListener('input', () => {
@@ -1155,11 +1292,7 @@ let currentMediaTarget = 'featured';
 let tinymceFilePickerCallback = null;
 
 const isDarkActive = () => {
-    return document.documentElement.getAttribute('data-theme') === 'dark' || 
-           document.body.getAttribute('data-theme') === 'dark' ||
-           document.body.classList.contains('dark') ||
-           document.body.classList.contains('dark-theme') ||
-           localStorage.getItem('theme') === 'dark';
+    return document.documentElement.getAttribute('data-theme') === 'dark';
 };
 
 function initCleanTinyMCE() {
@@ -1852,8 +1985,8 @@ mediaItems.forEach(item => {
 
     function showPreview(rev) {
         var overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(11,15,25,.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);';
-        overlay.innerHTML = '<div style="width:100%;max-width:860px;height:80vh;background:var(--bg-card,#111827);border:1px solid var(--border-subtle);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;">'
+        overlay.style.cssText = 'position:fixed;inset:0;background:var(--modal-overlay);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);';
+        overlay.innerHTML = '<div style="width:100%;max-width:860px;height:80vh;background:var(--modal-bg);border:1px solid var(--border-subtle);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;">'
             + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border-subtle);">'
             +   '<div style="min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(rev.title) + '</div>'
             +   '<div style="font-size:11px;color:var(--text-muted);">' + esc(rev.created_at) + ' &bull; ' + esc(sourceLabel(rev.source)) + '</div></div>'

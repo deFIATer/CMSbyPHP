@@ -58,12 +58,12 @@
         }
 
         var overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(11,15,25,.8);z-index:100000;'
+        overlay.style.cssText = 'position:fixed;inset:0;background:var(--modal-overlay);z-index:100000;'
             + 'display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:20px;';
 
         var box = document.createElement('div');
         box.className = 'card';
-        box.style.cssText = 'width:100%;max-width:420px;background:var(--bg-card,#111827);'
+        box.style.cssText = 'width:100%;max-width:420px;background:var(--modal-bg);'
             + 'border:1px solid var(--border-subtle);border-radius:var(--radius-md,10px);padding:20px;'
             + 'display:flex;flex-direction:column;gap:12px;';
         box.innerHTML = '<h3 style="margin:0;font-size:15px;font-weight:700;color:var(--text-main);">' + esc(options.title || '') + '</h3>'
@@ -142,7 +142,7 @@
         container.innerHTML = '';
         container.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:8px;'
             + 'padding:8px 10px;margin-bottom:10px;border:1px solid var(--border-subtle);'
-            + 'border-radius:var(--radius-sm,8px);background:var(--bg-surface,#1e293b);';
+            + 'border-radius:var(--radius-sm,8px);background:var(--bg-subtle);';
 
         if (!visible.length) {
             container.style.display = 'none';

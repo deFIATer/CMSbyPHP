@@ -5,7 +5,7 @@ namespace Core;
 
 /**
  * Class Sitemap
- * Generates and updates Google-compliant XML sitemaps for Modo CMS.
+ * Generates and updates Google-compliant XML sitemaps for CMSbyPHP.
  */
 final class Sitemap {
 
@@ -16,7 +16,7 @@ final class Sitemap {
 public static function generateRobotsTxt(): bool {
     $robotsPath = dirname(__DIR__) . '/robots.txt';
 
-    // Settings -> System: a custom robots.txt (modoconfig.php) replaces the
+    // Settings -> System: a custom robots.txt (cmsbyphpconfig.php) replaces the
     // generated rules. The physical file stays authoritative - Apache, nginx
     // and the PHP built-in server serve it directly, while Router::dispatch()
     // only falls back to the same override when the file cannot be written.
