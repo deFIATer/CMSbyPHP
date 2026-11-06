@@ -462,6 +462,15 @@ final class Database {
         try {
             $db->exec("CREATE INDEX IF NOT EXISTS idx_pages_deleted ON pages(deleted_at)");
             $db->exec("CREATE INDEX IF NOT EXISTS idx_categories_parent ON categories(parent_id)");
+            $db->exec("CREATE TABLE IF NOT EXISTS plugins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                folder TEXT UNIQUE NOT NULL,
+                is_active INTEGER DEFAULT 0
+            )");
+            $pluginCount = (int)$db->query("SELECT COUNT(*) FROM plugins WHERE folder = 'file-manager'")->fetchColumn();
+            if ($pluginCount === 0) {
+                $db->exec("INSERT INTO plugins (folder, is_active) VALUES ('file-manager', 1)");
+            }
         } catch (PDOException $e) {
             // Optional
         }

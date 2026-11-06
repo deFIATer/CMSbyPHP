@@ -241,8 +241,31 @@ unset($_SESSION['admin_theme_reset']);
                     <div class="nav-submenu">
                         <a href="snippets.php" class="nav-sublink <?= $currentPage === 'snippets.php' ? 'active' : '' ?>"><?= _e('Snippets') ?></a>
                         <a href="backup.php" class="nav-sublink <?= $currentPage === 'backup.php' ? 'active' : '' ?>"><?= _e('Backups') ?></a>
+                        <?php if (!empty(\Core\GSRegistry::$adminSidebarItems)): ?>
+                            <?php foreach (\Core\GSRegistry::$adminSidebarItems as $sItem): ?>
+                                <a href="plugins.php?id=<?= urlencode($sItem['id']) ?>" class="nav-sublink <?= ($currentPage === 'plugins.php' && ($_GET['id'] ?? '') === $sItem['id']) ? 'active' : '' ?>">
+                                    <?= \Core\Security::sanitize($sItem['title']) ?>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
+
+                <!-- Dedykowane pozycje menu z włączonych wtyczek -->
+                <?php if (!empty(\Core\GSRegistry::$adminSidebarItems)): ?>
+                    <?php foreach (\Core\GSRegistry::$adminSidebarItems as $sItem): 
+                        $isThisPluginActive = ($currentPage === 'plugins.php' && ($_GET['id'] ?? '') === $sItem['id']);
+                    ?>
+                        <div class="nav-group <?= $isThisPluginActive ? 'open' : '' ?>">
+                            <a href="plugins.php?id=<?= urlencode($sItem['id']) ?>" class="nav-link <?= $isThisPluginActive ? 'active' : '' ?>">
+                                <div class="nav-link-main">
+                                    <?= render_admin_sidebar_icon($sItem['icon'] ?? '') ?>
+                                    <span class="nav-text"><?= \Core\Security::sanitize($sItem['title']) ?></span>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
 
                 <!-- Ustawienia / Settings -->
                 <div class="nav-group <?= $isSettingsGroup ? 'open' : '' ?>">
