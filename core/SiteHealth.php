@@ -33,7 +33,7 @@ final class SiteHealth
             $installerPresent
                 ? __('install.php is still present. Delete or lock it after installation.')
                 : __('install.php is not reachable.'),
-            ''
+            $installerPresent ? 'index.php?action=remove_installer&csrf=' . Security::generateCsrfToken() : ''
         );
 
         $writable = is_writable(dirname(__DIR__) . '/data') && is_writable(dirname(__DIR__) . '/uploads');

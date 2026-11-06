@@ -1834,5 +1834,6 @@
     "Delete Static Page Permanently": "Delete Static Page Permanently",
     "Restore Page": "Restore Page",
     "Move all selected items to trash?": "Move all selected items to trash?",
-    "Permanently delete all selected items? This cannot be undone.": "Permanently delete all selected items? This cannot be undone."
+    "Permanently delete all selected items? This cannot be undone.": "Permanently delete all selected items? This cannot be undone.",
+    "Fix (Delete install.php)": "Fix (Delete install.php)"
 }

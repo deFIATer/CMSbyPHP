@@ -114,7 +114,7 @@ require_once __DIR__ . '/views/header.php';
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="" onsubmit="return confirm('<?= _e('Proceed with the automatic CMSbyPHP update?') ?>');">
+        <form id="update-form" method="POST" action="">
             <input type="hidden" name="action" value="do_update">
             <input type="hidden" name="csrf_token" value="<?= Security::generateCsrfToken() ?>">
 
@@ -128,7 +128,7 @@ require_once __DIR__ . '/views/header.php';
                 </p>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 14px; font-weight: 600;">
+            <button type="button" id="start-update-btn" class="btn btn-primary" style="padding: 10px 24px; font-size: 14px; font-weight: 600;">
                 ⚡ <?= _e('Update CMSbyPHP Now') ?>
             </button>
         </form>
@@ -151,7 +151,7 @@ require_once __DIR__ . '/views/header.php';
 
         <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-subtle);">
 
-        <form method="POST" action="" onsubmit="return confirm('<?= _e('Re-install current version from GitHub?') ?>');">
+        <form id="reinstall-form" method="POST" action="">
             <input type="hidden" name="action" value="do_update">
             <input type="hidden" name="csrf_token" value="<?= Security::generateCsrfToken() ?>">
 
@@ -160,13 +160,143 @@ require_once __DIR__ . '/views/header.php';
                     <input type="checkbox" name="auto_backup" value="1" checked style="cursor: pointer;">
                     <span><?= _e('Create a backup before re-installing') ?></span>
                 </label>
-                <button type="submit" class="btn btn-secondary" style="font-size: 12px; padding: 6px 14px;">
+                <button type="button" id="start-reinstall-btn" class="btn btn-secondary" style="font-size: 12px; padding: 6px 14px;">
                     🔄 <?= _e('Re-install version') ?> <?= Updater::VERSION ?>
                 </button>
             </div>
         </form>
     <?php endif; ?>
 </div>
+
+<!-- Modal: Nowoczesny popup potwierdzenia i pasek postępu aktualizacji -->
+<div id="update-modal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); z-index: 9999; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(6px);">
+    <div style="background: var(--bg-surface, #ffffff); border: 1px solid var(--border-subtle, #e2e8f0); border-radius: 16px; max-width: 500px; width: 100%; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); text-align: center; position: relative;">
+        
+        <!-- Krok 1: Eleganckie potwierdzenie -->
+        <div id="modal-step-confirm">
+            <div style="width: 56px; height: 56px; border-radius: 16px; background: rgba(37, 99, 235, 0.12); color: #2563eb; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px;">
+                ⚡
+            </div>
+            <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px; color: var(--text-main);">
+                <?= _e('Aktualizacja systemu CMSbyPHP') ?>
+            </h3>
+            <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0 0 22px;">
+                Czy na pewno chcesz przeprowadzić automatyczną aktualizację CMSbyPHP? System pobierze najnowsze pliki z GitHuba, zaktualizuje rdzeń i odświeży pamięć podręczną.
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" id="modal-cancel-btn" class="btn btn-secondary" style="padding: 9px 18px; font-size: 13px; font-weight: 600;">
+                    <?= _e('Anuluj') ?>
+                </button>
+                <button type="button" id="modal-confirm-btn" class="btn btn-primary" style="padding: 9px 22px; font-size: 13px; font-weight: 600;">
+                    🚀 <?= _e('Rozpocznij aktualizację') ?>
+                </button>
+            </div>
+        </div>
+
+        <!-- Krok 2: Animowany pasek postępu podczas instalacji -->
+        <div id="modal-step-progress" style="display: none;">
+            <div style="width: 56px; height: 56px; border-radius: 16px; background: rgba(99, 102, 241, 0.12); color: #6366f1; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px;">
+                🔄
+            </div>
+            <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 6px; color: var(--text-main);">
+                Trwa aktualizacja...
+            </h3>
+            <p id="progress-status-text" style="font-size: 13px; color: var(--text-muted); margin: 0 0 18px;">
+                Przygotowywanie procesu aktualizacji...
+            </p>
+
+            <!-- Pasek postępu -->
+            <div style="width: 100%; height: 10px; background: var(--bg-subtle, #f1f5f9); border-radius: 999px; overflow: hidden; margin-bottom: 14px; border: 1px solid var(--border-subtle);">
+                <div id="update-progress-bar" style="width: 15%; height: 100%; background: linear-gradient(90deg, #3b82f6, #6366f1, #10b981); border-radius: 999px; transition: width 0.4s ease;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); font-weight: 600;">
+                <span id="progress-percent">15%</span>
+                <span>Nie zamykaj tego okna</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('update-modal');
+    const stepConfirm = document.getElementById('modal-step-confirm');
+    const stepProgress = document.getElementById('modal-step-progress');
+    const cancelBtn = document.getElementById('modal-cancel-btn');
+    const confirmBtn = document.getElementById('modal-confirm-btn');
+    const progressBar = document.getElementById('update-progress-bar');
+    const progressStatus = document.getElementById('progress-status-text');
+    const progressPercent = document.getElementById('progress-percent');
+
+    const updateBtn = document.getElementById('start-update-btn');
+    const reinstallBtn = document.getElementById('start-reinstall-btn');
+    let activeForm = null;
+
+    function openUpdateModal(form) {
+        activeForm = form;
+        stepConfirm.style.display = 'block';
+        stepProgress.style.display = 'none';
+        modal.style.display = 'flex';
+    }
+
+    if (updateBtn) {
+        updateBtn.addEventListener('click', () => openUpdateModal(document.getElementById('update-form')));
+    }
+    if (reinstallBtn) {
+        reinstallBtn.addEventListener('click', () => openUpdateModal(document.getElementById('reinstall-form')));
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+            // Przełącz do kroku paska postępu
+            stepConfirm.style.display = 'none';
+            stepProgress.style.display = 'block';
+
+            let currentProgress = 20;
+            progressBar.style.width = currentProgress + '%';
+            progressPercent.textContent = currentProgress + '%';
+            progressStatus.textContent = '1/4 Tworzenie kopii zapasowej bazy danych i plików...';
+
+            // Animacja etapów podczas wykonywania zapytania
+            setTimeout(() => {
+                currentProgress = 45;
+                progressBar.style.width = currentProgress + '%';
+                progressPercent.textContent = currentProgress + '%';
+                progressStatus.textContent = '2/4 Pobieranie nowej paczki z oficjalnego repozytorium GitHub...';
+            }, 1200);
+
+            setTimeout(() => {
+                currentProgress = 75;
+                progressBar.style.width = currentProgress + '%';
+                progressPercent.textContent = currentProgress + '%';
+                progressStatus.textContent = '3/4 Rozpakowywanie archiwum i aktualizacja plików...';
+            }, 2500);
+
+            setTimeout(() => {
+                currentProgress = 92;
+                progressBar.style.width = currentProgress + '%';
+                progressPercent.textContent = currentProgress + '%';
+                progressStatus.textContent = '4/4 Czyszczenie pamięci podręcznej i finalizacja...';
+            }, 3800);
+
+            // Wyślij formularz do serwera
+            if (activeForm) {
+                setTimeout(() => {
+                    activeForm.submit();
+                }, 400);
+            }
+        });
+    }
+});
+</script>
 
 <!-- GitHub Source & Integrity Info -->
 <div class="card" style="padding: 20px;">

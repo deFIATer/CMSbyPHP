@@ -1834,5 +1834,6 @@
     "Delete Static Page Permanently": "Trwałe usunięcie strony statycznej",
     "Restore Page": "Przywróć stronę",
     "Move all selected items to trash?": "Przenieść zaznaczone elementy do kosza?",
-    "Permanently delete all selected items? This cannot be undone.": "Trwale usunąć wszystkie zaznaczone elementy? Tej operacji nie można cofnąć."
+    "Permanently delete all selected items? This cannot be undone.": "Trwale usunąć wszystkie zaznaczone elementy? Tej operacji nie można cofnąć.",
+    "Fix (Delete install.php)": "Napraw (usuń install.php)"
 }

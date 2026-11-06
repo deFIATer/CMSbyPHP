@@ -194,7 +194,9 @@ final class Updater
             'ftp_config.json',
             '.git',
             'deploy_ftp.py',
-            'deploy.sh'
+            'deploy.sh',
+            'install.php',
+            'install.php.bak'
         ];
 
         $targetBase = realpath(__DIR__ . '/..');

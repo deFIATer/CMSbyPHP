@@ -14,6 +14,22 @@ use Core\SiteHealth;
 $db = Database::getConnection();
 $msg = '';
 
+// Handle removal of installer file (install.php)
+if (isset($_GET['action']) && $_GET['action'] === 'remove_installer') {
+    if (Security::verifyCsrfToken($_GET['csrf'] ?? '')) {
+        $installerPath = dirname(__DIR__) . '/install.php';
+        if (file_exists($installerPath)) {
+            if (@unlink($installerPath)) {
+                $msg = 'Plik instalatora (install.php) został pomyślnie usunięty ze względów bezpieczeństwa.';
+            } else {
+                $msg = 'Nie udało się automatycznie usunąć pliku install.php (sprawdź uprawnienia do zapisu).';
+            }
+        } else {
+            $msg = 'Plik instalatora (install.php) nie istnieje na serwerze.';
+        }
+    }
+}
+
 // Handle Quick Draft submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'quick_draft') {
     if (Security::verifyCsrfToken($_POST['csrf_token'] ?? '')) {
@@ -163,7 +179,13 @@ $healthOk = count($healthRows) - count($healthIssues);
                         <div style="font-size: 12px; font-weight: 700; color: var(--text-main);"><?= Security::sanitize($issue['label']) ?></div>
                         <div style="font-size: 11px; color: var(--text-muted); line-height: 1.45; margin-top: 2px;"><?= Security::sanitize($issue['detail']) ?></div>
                         <?php if (!empty($issue['action'])): ?>
-                            <a href="<?= htmlspecialchars($issue['action'], ENT_QUOTES, 'UTF-8') ?>" style="font-size: 11px; color: var(--primary); display: inline-block; margin-top: 4px;"><?= _e('Fix') ?> &rarr;</a>
+                            <?php if ($issue['id'] === 'installer'): ?>
+                                <a href="<?= htmlspecialchars($issue['action'], ENT_QUOTES, 'UTF-8') ?>" class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                                    🗑️ <?= _e('Fix (Delete install.php)') ?>
+                                </a>
+                            <?php else: ?>
+                                <a href="<?= htmlspecialchars($issue['action'], ENT_QUOTES, 'UTF-8') ?>" style="font-size: 11px; color: var(--primary); display: inline-block; margin-top: 4px;"><?= _e('Fix') ?> &rarr;</a>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>
