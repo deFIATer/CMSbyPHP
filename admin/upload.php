@@ -147,7 +147,23 @@ $extMap = [
     'application/gzip' => 'gz'
 ];
 $ext = $extMap[$mime] ?? ($origExt ?: 'bin');
-$safeName = bin2hex(random_bytes(16)) . '.' . $ext;
+
+// Zachowaj oryginalną nazwę pliku (sanitize pod kątem systemu plików)
+$origName = basename((string)($file['name'] ?? ''));
+$rawBase = pathinfo($origName, PATHINFO_FILENAME);
+$rawExt = pathinfo($origName, PATHINFO_EXTENSION);
+if ($rawExt === '') {
+    $rawExt = $ext;
+}
+$rawExt = strtolower($rawExt);
+
+// Bezpieczne usunięcie znaków niedozwolonych w systemach plików (\ / ? * : ; " < > | oraz bajtów kontrolnych)
+$cleanBase = preg_replace('/[\/\\\\?*:;"<>|\x00-\x1f\x7f]+/u', '', $rawBase);
+$cleanBase = trim($cleanBase);
+if ($cleanBase === '') {
+    $cleanBase = 'plik';
+}
+$displayFilename = $cleanBase . ($rawExt !== '' ? ('.' . $rawExt) : '');
 
 $isPrivateUpload = !empty($_POST['is_private']) && $_POST['is_private'] === '1' && !empty($_POST['password']);
 $uploadPassword = $isPrivateUpload ? trim((string)$_POST['password']) : null;
@@ -156,6 +172,16 @@ $uploadDir = $isPrivateUpload ? \Core\ProtectedMedia::getProtectedDir() . '/' : 
 if (!is_dir($uploadDir)) {
     @mkdir($uploadDir, 0775, true);
 }
+
+// Jeśli plik o takiej nazwie już istnieje w folderze docelowym, dodaj kolejny numer (np. plik-1.jpg, plik-2.jpg)
+$finalName = $displayFilename;
+$counter = 1;
+while (file_exists($uploadDir . $finalName)) {
+    $finalName = $cleanBase . '-' . $counter . ($rawExt !== '' ? ('.' . $rawExt) : '');
+    $counter++;
+}
+$safeName = $finalName;
+$displayFilename = $finalName;
 
 if (move_uploaded_file($file['tmp_name'], $uploadDir . $safeName)) {
     $targetFile = $uploadDir . $safeName;
@@ -207,7 +233,7 @@ if (move_uploaded_file($file['tmp_name'], $uploadDir . $safeName)) {
         VALUES (:f, :p, :m, :s, :w, :ip, :ph, :at, :u)
     ");
     $stmt->execute([
-        ':f'  => basename($file['name']),
+        ':f'  => $displayFilename,
         ':p'  => $storagePath,
         ':m'  => $mime,
         ':s'  => $file['size'],
@@ -221,7 +247,7 @@ if (move_uploaded_file($file['tmp_name'], $uploadDir . $safeName)) {
     $newId = (int)$db->lastInsertId();
     $mediaRecord = [
         'id' => $newId,
-        'filename' => basename($file['name']),
+        'filename' => $displayFilename,
         'filepath' => $storagePath,
         'is_private' => $isPrivateUpload ? 1 : 0
     ];
@@ -230,6 +256,7 @@ if (move_uploaded_file($file['tmp_name'], $uploadDir . $safeName)) {
 
     echo json_encode([
         'id'       => $newId,
+        'filename' => $displayFilename,
         'location' => $publicUrl,
         'url'      => $publicUrl,
         'is_private' => $isPrivateUpload ? 1 : 0

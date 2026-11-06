@@ -9,21 +9,21 @@ namespace Core {
      * Manages system localization, dictionary loaders, frontend routing detection, and admin language scopes.
      */
     final class I18n {
-        private static string $frontendLang = 'en';
-        private static string $adminLang = 'en';
-        private static string $defaultLang = 'en';
+        private static string $frontendLang = 'pl';
+        private static string $adminLang = 'pl';
+        private static string $defaultLang = 'pl';
         private static array $translations = [];
         private static array $availableLanguages = [];
 
         public static function init(): void {
-            self::$defaultLang = class_exists('\Core\Router') ? Router::getOption('default_language', 'en') : 'en';
+            self::$defaultLang = class_exists('\Core\Router') ? Router::getOption('default_language', 'pl') : 'pl';
             // modoconfig.php may pin the frontend language ("language" option).
             $configuredLanguage = class_exists('\Core\Config') ? \Core\Config::getString('language', '') : '';
             if ($configuredLanguage !== '' && preg_match('/^[a-z0-9_-]+$/i', $configuredLanguage) === 1) {
                 self::$defaultLang = strtolower($configuredLanguage);
             }
 
-            $rawLangs = class_exists('\Core\Router') ? Router::getOption('available_languages', 'en:English,pl:Polski') : 'en:English,pl:Polski';
+            $rawLangs = class_exists('\Core\Router') ? Router::getOption('available_languages', 'pl:Polski,en:English') : 'pl:Polski,en:English';
 
             self::$availableLanguages = [];
             foreach (explode(',', $rawLangs) as $pair) {
@@ -34,7 +34,7 @@ namespace Core {
             }
 
             if (empty(self::$availableLanguages)) {
-                self::$availableLanguages = ['en' => 'English', 'pl' => 'Polski'];
+                self::$availableLanguages = ['pl' => 'Polski', 'en' => 'English'];
             }
 
             self::detectFrontendLanguage();

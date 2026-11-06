@@ -260,7 +260,7 @@ final class Database {
         ");
 
         // Seed default administrator: admin / admin123
-        $stmt = $db->prepare("INSERT OR IGNORE INTO users (id, username, password_hash, email, role, admin_lang) VALUES (1, 'admin', :h, 'admin@example.com', 'admin', 'en')");
+        $stmt = $db->prepare("INSERT OR IGNORE INTO users (id, username, password_hash, email, role, admin_lang) VALUES (1, 'admin', :h, 'admin@example.com', 'admin', 'pl')");
         $stmt->execute([':h' => password_hash('admin123', PASSWORD_BCRYPT, ['cost' => 12])]);
 
         // Seed configuration settings
@@ -271,8 +271,9 @@ final class Database {
             'active_theme' => 'default',
             'posts_per_page' => '6',
             'multilingual_frontend' => '0',
-            'default_language' => 'en',
-            'available_languages' => 'en:English,pl:Polski',
+            'default_language' => 'pl',
+            'admin_language' => 'pl',
+            'available_languages' => 'pl:Polski,en:English',
             'header_menu_slug' => 'main-menu',
             'lang_switcher_style' => 'inline',
             'security_brute_force_enabled' => '1',
