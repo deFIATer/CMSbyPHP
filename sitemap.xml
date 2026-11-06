@@ -1,49 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://127.0.0.1:8000/</loc>
-    <lastmod>2026-10-22</lastmod>
+    <loc>http://localhosttools/</loc>
+    <lastmod>2026-11-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>http://127.0.0.1:8000/blog</loc>
-    <lastmod>2026-10-22</lastmod>
+    <loc>http://localhosttools/blog</loc>
+    <lastmod>2026-11-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://127.0.0.1:8000/blog/sztuczna-inteligencja-w-codziennej-pracy-oszczednosc-czasu</loc>
+    <loc>http://localhosttools/blog/sztuczna-inteligencja-w-codziennej-pracy-oszczednosc-czasu</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>http://127.0.0.1:8000/glowna</loc>
+    <loc>http://localhosttools/glowna</loc>
     <lastmod>2026-10-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://127.0.0.1:8000/blog/tag/ai</loc>
+    <loc>http://localhosttools/blog/tag/ai</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>http://127.0.0.1:8000/blog/tag/llm</loc>
+    <loc>http://localhosttools/blog/tag/llm</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>http://127.0.0.1:8000/blog/tag/produktywnosc</loc>
+    <loc>http://localhosttools/blog/tag/produktywnosc</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>http://127.0.0.1:8000/blog/category/ai</loc>
+    <loc>http://localhosttools/blog/category/ai</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

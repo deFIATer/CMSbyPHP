@@ -317,20 +317,87 @@ function post_tags(?int $pageId = null, string $cssClass = 'post-tags', bool $ec
 }
 
 // Category Management Functions
+/**
+ * Returns the category hierarchy as a flat pre-order list with a "depth" key.
+ *
+ * @param array{with_post_counts?:bool} $args
+ * @return array<int,array<string,mixed>>
+ */
+function get_categories(array $args = []): array {
+    if (!class_exists('Core\CategoryTree')) {
+        return [];
+    }
+    return \Core\CategoryTree::flatten(\Core\CategoryTree::all(!empty($args['with_post_counts'])));
+}
+
+/**
+ * Returns the category hierarchy as a nested tree (entries contain "children").
+ *
+ * @param array{with_post_counts?:bool} $args
+ * @return array<int,array<string,mixed>>
+ */
+function get_category_tree(array $args = []): array {
+    if (!class_exists('Core\CategoryTree')) {
+        return [];
+    }
+    return \Core\CategoryTree::tree(\Core\CategoryTree::all(!empty($args['with_post_counts'])));
+}
+
+/**
+ * Returns the direct children of a category (0 = top level).
+ *
+ * @param array{with_post_counts?:bool} $args
+ * @return array<int,array<string,mixed>>
+ */
+function get_category_children(int $parentId = 0, array $args = []): array {
+    $parentId = max(0, $parentId);
+    if ($parentId === 0) {
+        return get_category_tree($args);
+    }
+
+    $find = static function (array $nodes) use (&$find, $parentId): ?array {
+        foreach ($nodes as $node) {
+            if ((int) ($node['id'] ?? 0) === $parentId) {
+                return $node['children'] ?? [];
+            }
+            $found = $find($node['children'] ?? []);
+            if ($found !== null) {
+                return $found;
+            }
+        }
+        return null;
+    };
+
+    return $find(get_category_tree($args)) ?? [];
+}
+
 function get_post_categories(?int $pageId = null): array {
     $id = $pageId ?? (ThemeState::$currentPage['id'] ?? null);
     if (!$id) return [];
 
     $db = Database::getConnection();
     $stmt = $db->prepare("
-        SELECT c.id, c.name, c.slug, c.description
+        SELECT c.id, c.parent_id, c.name, c.slug, c.description
         FROM categories c
         JOIN page_categories pc ON pc.category_id = c.id
         WHERE pc.page_id = :pid
         ORDER BY c.name ASC
     ");
     $stmt->execute([':pid' => $id]);
-    return $stmt->fetchAll();
+    $categories = $stmt->fetchAll();
+
+    if (class_exists('Core\CategoryTree')) {
+        $depthById = [];
+        foreach (\Core\CategoryTree::flatten(\Core\CategoryTree::all(false)) as $cat) {
+            $depthById[(int) $cat['id']] = (int) $cat['depth'];
+        }
+        foreach ($categories as &$category) {
+            $category['depth'] = $depthById[(int) $category['id']] ?? 0;
+        }
+        unset($category);
+    }
+
+    return $categories;
 }
 
 function has_categories(?int $pageId = null): bool {

@@ -158,6 +158,21 @@ if (!is_dir($uploadDir)) {
 }
 
 if (move_uploaded_file($file['tmp_name'], $uploadDir . $safeName)) {
+    $targetFile = $uploadDir . $safeName;
+
+    // Auto-rotate smartphone photos according to EXIF orientation
+    if ($mime === 'image/jpeg' && class_exists('Core\ImageOrientation')) {
+        $ori = \Core\ImageOrientation::read($targetFile);
+        if ($ori > 1 && function_exists('imagecreatefromjpeg') && function_exists('imagejpeg')) {
+            $gd = @imagecreatefromjpeg($targetFile);
+            if ($gd) {
+                $gd = \Core\ImageOrientation::applyGd($gd, $targetFile);
+                @imagejpeg($gd, $targetFile, 92);
+                @imagedestroy($gd);
+            }
+        }
+    }
+
     $basePrefix = class_exists('Core\Router') ? Router::getBaseSubdirectory() : '';
 
     $webpPath = null;

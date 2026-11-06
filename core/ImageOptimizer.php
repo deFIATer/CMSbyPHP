@@ -58,6 +58,10 @@ final class ImageOptimizer
             return null;
         }
 
+        if (class_exists('Core\ImageOrientation')) {
+            $image = ImageOrientation::applyGd($image, $sourcePath);
+        }
+
         imagealphablending($image, true);
         imagesavealpha($image, true);
 

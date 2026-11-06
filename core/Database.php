@@ -63,6 +63,7 @@ final class Database {
                 email TEXT UNIQUE NOT NULL,
                 role TEXT NOT NULL DEFAULT 'editor',
                 admin_lang TEXT NOT NULL DEFAULT 'en',
+                admin_theme TEXT NOT NULL DEFAULT 'auto',
                 api_token TEXT UNIQUE,
                 reset_token TEXT UNIQUE,
                 reset_expires DATETIME,
@@ -85,6 +86,8 @@ final class Database {
                 meta_title TEXT,
                 meta_description TEXT,
                 author_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                published_at DATETIME,
+                deleted_at DATETIME,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
@@ -146,12 +149,14 @@ final class Database {
 
             CREATE TABLE IF NOT EXISTS categories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                parent_id INTEGER NOT NULL DEFAULT 0,
                 name TEXT NOT NULL,
                 slug TEXT NOT NULL UNIQUE,
                 description TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
             CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
+            CREATE INDEX IF NOT EXISTS idx_categories_parent ON categories(parent_id);
 
             CREATE TABLE IF NOT EXISTS page_categories (
                 page_id INTEGER NOT NULL REFERENCES pages(id) ON DELETE CASCADE,
@@ -446,7 +451,20 @@ final class Database {
         // Additive column migrations (idempotent — guarded by a column presence check).
         self::ensureColumn($db, 'users', 'totp_secret', 'TEXT');
         self::ensureColumn($db, 'users', 'totp_enabled', 'INTEGER NOT NULL DEFAULT 0');
+        self::ensureColumn($db, 'users', 'admin_theme', "TEXT NOT NULL DEFAULT 'auto'");
+        self::ensureColumn($db, 'pages', 'deleted_at', 'DATETIME');
+        self::ensureColumn($db, 'pages', 'published_at', 'DATETIME');
+        self::ensureColumn($db, 'categories', 'parent_id', 'INTEGER NOT NULL DEFAULT 0');
         self::ensureColumn($db, 'media', 'webp_path', 'TEXT');
+        self::ensureColumn($db, 'media', 'alt_text', 'TEXT');
+        self::ensureColumn($db, 'media', 'caption', 'TEXT');
+
+        try {
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_pages_deleted ON pages(deleted_at)");
+            $db->exec("CREATE INDEX IF NOT EXISTS idx_categories_parent ON categories(parent_id)");
+        } catch (PDOException $e) {
+            // Optional
+        }
 
         // Seed newly introduced settings on databases created by older versions.
         try {
@@ -456,6 +474,7 @@ final class Database {
                 'security_brute_force_max' => '5',
                 'security_brute_force_window' => '15',
                 'security_2fa_enabled' => '0',
+                'trash_retention_days' => '30',
                 'cache_enabled' => '0',
                 'cache_ttl' => '3600',
                 'webp_enabled' => '0',

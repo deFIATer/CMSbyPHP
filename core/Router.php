@@ -105,7 +105,7 @@ final class Router {
         $queryOffset = ($currentPageNumber - 1) * $postsPerPageLimit;
 
         // Licznik wpisów
-        $countStmt = $database->prepare("SELECT COUNT(*) FROM pages WHERE type = 'post' AND status = 'published' AND (lang = :lang OR lang = '')");
+        $countStmt = $database->prepare("SELECT COUNT(*) FROM pages WHERE type = 'post' AND status = 'published' AND deleted_at IS NULL AND (lang = :lang OR lang = '')");
         $countStmt->execute([':lang' => $activeLocale]);
         $totalPostsCount = (int)$countStmt->fetchColumn();
 
@@ -114,7 +114,7 @@ final class Router {
             SELECT p.*, u.username as author_name 
             FROM pages p 
             LEFT JOIN users u ON p.author_id = u.id 
-            WHERE p.type = 'post' AND p.status = 'published' AND (p.lang = :lang OR p.lang = '')
+            WHERE p.type = 'post' AND p.status = 'published' AND p.deleted_at IS NULL AND (p.lang = :lang OR p.lang = '')
             ORDER BY p.created_at DESC 
             LIMIT :lim OFFSET :off
         ");
@@ -263,6 +263,65 @@ final class Router {
             . '</main></body></html>';
     }
 
+    /**
+     * Renders a saved document for a valid signed preview token, regardless of its status.
+     * The content is never cached and is marked with noindex headers.
+     */
+    private static function renderPreviewPage(int $pageId): void {
+        $database = Database::getConnection();
+        $stmt = $database->prepare("
+            SELECT p.*, u.username AS author_name
+            FROM pages p
+            LEFT JOIN users u ON p.author_id = u.id
+            WHERE p.id = :id AND p.deleted_at IS NULL
+            LIMIT 1
+        ");
+        $stmt->execute([':id' => $pageId]);
+        $page = $stmt->fetch();
+
+        if (!$page) {
+            http_response_code(404);
+            $theme = basename(self::getOption('active_theme', 'cmsbyphp-clean'));
+            $themeDirectory = __DIR__ . '/../themes/' . $theme . '/';
+            if (is_file($themeDirectory . '404.php')) {
+                View::render($themeDirectory . '404.php');
+            } else {
+                echo '<h1>404 - Not found</h1>';
+            }
+            return;
+        }
+
+        if (!empty($page['lang'])) {
+            I18n::setLocale((string)$page['lang']);
+        }
+
+        header('X-Robots-Tag: noindex, nofollow');
+        header('Cache-Control: no-store, private');
+
+        \ThemeState::$currentPage = $page;
+        \ThemeState::$seoPayload = [
+            'title' => self::formatDocumentTitle((string)$page['title'], false),
+            'description' => (string)($page['meta_description'] ?? ''),
+            'og_image' => (string)($page['featured_image'] ?? ''),
+        ];
+
+        $theme = basename(self::getOption('active_theme', 'cmsbyphp-clean'));
+        $themeDirectory = __DIR__ . '/../themes/' . $theme . '/';
+        if ((string)$page['type'] === 'post') {
+            $template = is_file($themeDirectory . 'single.php') ? 'single.php' : 'page.php';
+        } else {
+            $template = is_file($themeDirectory . 'page.php') ? 'page.php' : 'index.php';
+        }
+
+        if (!is_file($themeDirectory . $template)) {
+            http_response_code(404);
+            echo '<h1>404 - Not found</h1>';
+            return;
+        }
+
+        View::render($themeDirectory . $template);
+    }
+
     public function dispatch(): void {
         $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $requestUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
@@ -274,6 +333,18 @@ final class Router {
             $normalizedPath = substr($normalizedPath, strlen($baseDir));
         }
         $normalizedPath = '/' . trim((string)$normalizedPath, '/');
+
+        // Signed Preview Links for unpublished drafts (valid 24h, noindex, bypass cache)
+        if (($normalizedPath === '/preview' && isset($_GET['token']) && is_string($_GET['token'])) || (isset($_GET['preview_token']) && is_string($_GET['preview_token']))) {
+            $t = $_GET['token'] ?? $_GET['preview_token'];
+            if (class_exists('Core\Preview')) {
+                $previewId = Preview::validate((string)$t);
+                if ($previewId !== null) {
+                    self::renderPreviewPage($previewId);
+                    return;
+                }
+            }
+        }
 
         // Plain HTTP requests are redirected to HTTPS when modoconfig.php asks for it.
         if (Config::getBool('require_https', false) && !Config::requestIsHttps()) {
@@ -416,7 +487,7 @@ final class Router {
                 SELECT COUNT(p.id) 
                 FROM pages p
                 JOIN page_tags pt ON pt.page_id = p.id
-                WHERE pt.tag_id = :tid AND p.type = 'post' AND p.status = 'published' AND (p.lang = :lang OR p.lang = '')
+                WHERE pt.tag_id = :tid AND p.type = 'post' AND p.status = 'published' AND p.deleted_at IS NULL AND (p.lang = :lang OR p.lang = '')
             ");
             $countStmt->execute([':tid' => $tag['id'], ':lang' => $activeLocale]);
             $totalPostsCount = (int)$countStmt->fetchColumn();
@@ -426,7 +497,7 @@ final class Router {
                 FROM pages p
                 JOIN page_tags pt ON pt.page_id = p.id
                 LEFT JOIN users u ON p.author_id = u.id
-                WHERE pt.tag_id = :tid AND p.type = 'post' AND p.status = 'published' AND (p.lang = :lang OR p.lang = '')
+                WHERE pt.tag_id = :tid AND p.type = 'post' AND p.status = 'published' AND p.deleted_at IS NULL AND (p.lang = :lang OR p.lang = '')
                 ORDER BY p.created_at DESC 
                 LIMIT :lim OFFSET :off
             ");
@@ -476,7 +547,7 @@ final class Router {
                 SELECT COUNT(p.id) 
                 FROM pages p
                 JOIN page_categories pc ON pc.page_id = p.id
-                WHERE pc.category_id = :cid AND p.type = 'post' AND p.status = 'published' AND (p.lang = :lang OR p.lang = '')
+                WHERE pc.category_id = :cid AND p.type = 'post' AND p.status = 'published' AND p.deleted_at IS NULL AND (p.lang = :lang OR p.lang = '')
             ");
             $countStmt->execute([':cid' => $category['id'], ':lang' => $activeLocale]);
             $totalPostsCount = (int)$countStmt->fetchColumn();
@@ -486,7 +557,7 @@ final class Router {
                 FROM pages p
                 JOIN page_categories pc ON pc.page_id = p.id
                 LEFT JOIN users u ON p.author_id = u.id
-                WHERE pc.category_id = :cid AND p.type = 'post' AND p.status = 'published' AND (p.lang = :lang OR p.lang = '')
+                WHERE pc.category_id = :cid AND p.type = 'post' AND p.status = 'published' AND p.deleted_at IS NULL AND (p.lang = :lang OR p.lang = '')
                 ORDER BY p.created_at DESC 
                 LIMIT :lim OFFSET :off
             ");
@@ -544,9 +615,10 @@ final class Router {
                     SELECT p.*, u.username as author_name 
                     FROM pages p 
                     LEFT JOIN users u ON p.author_id = u.id 
-                    WHERE (p.id = :hid OR p.translation_group = (SELECT translation_group FROM pages WHERE id = :hid2))
+                    WHERE (p.id = :hid OR p.translation_group = (SELECT translation_group FROM pages WHERE id = :hid2 AND deleted_at IS NULL))
                       AND (p.lang = :lang OR p.lang = '')
-                      AND p.status = 'published' 
+                      AND p.status = 'published'
+                      AND p.deleted_at IS NULL
                     LIMIT 1
                 ");
                 $stmt->execute([':hid' => $configuredHomeId, ':hid2' => $configuredHomeId, ':lang' => $activeLocale]);
@@ -561,7 +633,8 @@ final class Router {
                     LEFT JOIN users u ON p.author_id = u.id 
                     WHERE p.slug = 'home' 
                       AND (p.lang = :lang OR p.lang = '') 
-                      AND p.status = 'published' 
+                      AND p.status = 'published'
+                      AND p.deleted_at IS NULL
                     LIMIT 1
                 ");
                 $stmt->execute([':lang' => $activeLocale]);
@@ -574,7 +647,7 @@ final class Router {
                     SELECT p.*, u.username as author_name 
                     FROM pages p 
                     LEFT JOIN users u ON p.author_id = u.id 
-                    WHERE p.type = 'page' AND p.status = 'published' 
+                    WHERE p.type = 'page' AND p.status = 'published' AND p.deleted_at IS NULL
                     ORDER BY p.id ASC 
                     LIMIT 1
                 ");
@@ -595,7 +668,8 @@ final class Router {
                       AND p.type = 'page' 
                       AND p.parent_id = :pid 
                       AND (p.lang = :lang OR p.lang = '') 
-                      AND p.status = 'published' 
+                      AND p.status = 'published'
+                      AND p.deleted_at IS NULL
                     LIMIT 1
                 ");
                 $stmt->execute([':s' => $slug, ':pid' => $parentId, ':lang' => $activeLocale]);
@@ -622,7 +696,8 @@ final class Router {
                     WHERE p.slug = :s 
                       AND p.type = 'post' 
                       AND (p.lang = :lang OR p.lang = '') 
-                      AND p.status = 'published' 
+                      AND p.status = 'published'
+                      AND p.deleted_at IS NULL
                     LIMIT 1
                 ");
                 $postStmt->execute([':s' => $pathSegments[1], ':lang' => $activeLocale]);
@@ -805,7 +880,7 @@ final class Router {
             SELECT p.*, u.username as author_name 
             FROM pages p
             LEFT JOIN users u ON p.author_id = u.id
-            WHERE p.type = 'post' AND p.status = 'published'
+            WHERE p.type = 'post' AND p.status = 'published' AND p.deleted_at IS NULL
             ORDER BY p.created_at DESC
             LIMIT 25
         ");

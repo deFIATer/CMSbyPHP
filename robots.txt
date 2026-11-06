@@ -4,4 +4,4 @@ Disallow: /admin/
 Disallow: /core/
 Disallow: /uploads/cache/
 
-Sitemap: http://localhost/sitemap.xml
+Sitemap: http://localhosttools/sitemap.xml

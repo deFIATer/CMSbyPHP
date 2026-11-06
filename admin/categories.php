@@ -4,6 +4,7 @@ define('IN_ADMIN', true);
 require_once __DIR__ . '/../core/bootstrap.php';
 
 use Core\Auth;
+use Core\CategoryTree;
 use Core\Database;
 use Core\Router;
 use Core\Security;
@@ -15,15 +16,21 @@ $db = Database::getConnection();
 $message = '';
 $messageType = 'success';
 
+// Full category list is needed for parent validation before the form is saved.
+$allCategories = CategoryTree::all(true);
+
 $editId = isset($_GET['edit']) ? (int) $_GET['edit'] : 0;
-$form = ['id' => 0, 'name' => '', 'slug' => '', 'description' => ''];
+$form = ['id' => 0, 'name' => '', 'slug' => '', 'description' => '', 'parent_id' => 0];
 
 /**
  * Normalizes a category name into a URL friendly slug.
  */
 function categorySlugify(string $value): string
 {
-    return strtolower(trim((string) preg_replace('/[^A-Za-z0-9-]+/', '-', $value), '-'));
+    // Transliterate Polish characters for cleaner slugs
+    $plMap = ['ą'=>'a','ć'=>'c','ę'=>'e','ł'=>'l','ń'=>'n','ó'=>'o','ś'=>'s','ź'=>'z','ż'=>'z','Ą'=>'a','Ć'=>'c','Ę'=>'e','Ł'=>'l','Ń'=>'n','Ó'=>'o','Ś'=>'s','Ź'=>'z','Ż'=>'z'];
+    $clean = strtr($value, $plMap);
+    return strtolower(trim((string) preg_replace('/[^A-Za-z0-9-]+/', '-', $clean), '-'));
 }
 
 // Handle create / update
@@ -33,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
     }
 
     $categoryId = (int) ($_POST['id'] ?? 0);
+    $parentId = (int) ($_POST['parent_id'] ?? 0);
     $name = trim((string) ($_POST['name'] ?? ''));
     $slug = categorySlugify(trim((string) ($_POST['slug'] ?? '')));
     if ($slug === '') {
@@ -40,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
     }
     $description = trim((string) ($_POST['description'] ?? ''));
 
-    $form = ['id' => $categoryId, 'name' => $name, 'slug' => $slug, 'description' => $description];
+    $form = ['id' => $categoryId, 'name' => $name, 'slug' => $slug, 'description' => $description, 'parent_id' => $parentId];
 
     if ($name === '') {
         $message = __('Category name is required.');
@@ -48,15 +56,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
     } elseif ($slug === '') {
         $message = __('Category slug is required.');
         $messageType = 'danger';
+    } elseif (!CategoryTree::isValidParent($allCategories, $categoryId, $parentId)) {
+        $message = $parentId === $categoryId
+            ? __('A category cannot be its own parent.')
+            : __('A category cannot be moved under one of its own subcategories.');
+        if (CategoryTree::find($allCategories, $parentId) === null) {
+            $message = __('The selected parent category does not exist.');
+        }
+        $messageType = 'danger';
+        $form['parent_id'] = 0;
     } else {
         try {
             if ($categoryId > 0) {
-                $stmt = $db->prepare("UPDATE categories SET name = :n, slug = :s, description = :d WHERE id = :id");
-                $stmt->execute([':n' => $name, ':s' => $slug, ':d' => $description, ':id' => $categoryId]);
+                $stmt = $db->prepare("UPDATE categories SET parent_id = :p, name = :n, slug = :s, description = :d WHERE id = :id");
+                $stmt->execute([':p' => $parentId, ':n' => $name, ':s' => $slug, ':d' => $description, ':id' => $categoryId]);
             } else {
-                $stmt = $db->prepare("INSERT INTO categories (name, slug, description) VALUES (:n, :s, :d)");
-                $stmt->execute([':n' => $name, ':s' => $slug, ':d' => $description]);
+                $stmt = $db->prepare("INSERT INTO categories (parent_id, name, slug, description) VALUES (:p, :n, :s, :d)");
+                $stmt->execute([':p' => $parentId, ':n' => $name, ':s' => $slug, ':d' => $description]);
                 $categoryId = (int) $db->lastInsertId();
+            }
+            if (class_exists('Core\PageCache')) {
+                \Core\PageCache::purge();
             }
             header('Location: categories.php?edit=' . $categoryId . '&saved=1');
             exit;
@@ -69,9 +89,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save'
 
 // Handle delete
 if (isset($_GET['delete'], $_GET['csrf']) && Security::verifyCsrfToken((string) $_GET['csrf'])) {
+    $deleteId = (int) $_GET['delete'];
+    $deletedCategory = CategoryTree::find($allCategories, $deleteId);
+    $newParentId = $deletedCategory !== null ? (int) ($deletedCategory['parent_id'] ?? 0) : 0;
+
+    // Promote children instead of orphaning them: reparent to deleted category's parent
+    $moveChildren = $db->prepare("UPDATE categories SET parent_id = :parent WHERE parent_id = :id");
+    $moveChildren->execute([':parent' => $newParentId, ':id' => $deleteId]);
+    $movedChildren = $moveChildren->rowCount();
+
     $stmt = $db->prepare("DELETE FROM categories WHERE id = :id");
-    $stmt->execute([':id' => (int) $_GET['delete']]);
-    header('Location: categories.php?deleted=1');
+    $stmt->execute([':id' => $deleteId]);
+
+    if (class_exists('Core\PageCache')) {
+        \Core\PageCache::purge();
+    }
+
+    $extra = $movedChildren > 0 ? '&children_moved=' . $movedChildren : '';
+    header('Location: categories.php?deleted=1' . $extra);
     exit;
 }
 
@@ -83,6 +118,7 @@ if ($editId > 0 && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     if ($found) {
         $form = [
             'id' => (int) $found['id'],
+            'parent_id' => (int) ($found['parent_id'] ?? 0),
             'name' => (string) $found['name'],
             'slug' => (string) $found['slug'],
             'description' => (string) ($found['description'] ?? ''),
@@ -90,16 +126,11 @@ if ($editId > 0 && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     }
 }
 
-$allCategories = $db->query("
-    SELECT c.*, (
-        SELECT COUNT(*)
-        FROM page_categories pc
-        JOIN pages p ON p.id = pc.page_id
-        WHERE pc.category_id = c.id AND p.type = 'post'
-    ) AS post_count
-    FROM categories c
-    ORDER BY c.name ASC
-")->fetchAll();
+// Build pre-order hierarchical list
+$categoryTree = CategoryTree::flatten($allCategories);
+$descendantIds = $form['id'] > 0 ? CategoryTree::descendantIds($allCategories, (int) $form['id']) : [];
+$excludedParentIds = array_merge([(int) $form['id']], $descendantIds);
+$excludedParentIds = array_values(array_filter($excludedParentIds, static fn(int $id): bool => $id > 0));
 
 $postsSlug = Router::getPostsPageSlug();
 
@@ -120,6 +151,11 @@ require_once __DIR__ . '/views/header.php';
 <?php elseif (isset($_GET['deleted'])): ?>
     <div class="card" style="border-left: 4px solid var(--success); padding: 12px; margin-bottom: 20px;">
         <?= _e('Category deleted successfully.') ?>
+        <?php if (isset($_GET['children_moved'])): ?>
+            <div style="margin-top: 4px; font-size: 12px; color: var(--text-muted);">
+                <?= _e('Subcategories were moved to the parent category.') ?>
+            </div>
+        <?php endif; ?>
     </div>
 <?php endif; ?>
 
@@ -143,6 +179,20 @@ require_once __DIR__ . '/views/header.php';
             <div class="form-group">
                 <label class="form-label" for="name"><?= _e('Category Name') ?></label>
                 <input class="form-control" type="text" id="name" name="name" value="<?= Security::sanitize((string) $form['name']) ?>" placeholder="<?= _e('Technology') ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="parent_id"><?= _e('Parent Category') ?></label>
+                <select class="form-control" id="parent_id" name="parent_id">
+                    <option value="0"><?= _e('No Parent (Top Level)') ?></option>
+                    <?php foreach ($categoryTree as $parentOption): ?>
+                        <?php if (in_array((int) $parentOption['id'], $excludedParentIds, true)) continue; ?>
+                        <option value="<?= (int) $parentOption['id'] ?>" <?= (int) $form['parent_id'] === (int) $parentOption['id'] ? 'selected' : '' ?>>
+                            <?= str_repeat('— ', (int) $parentOption['depth']) . Security::sanitize((string) $parentOption['name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <small style="color: var(--text-muted);"><?= _e('Choose a parent category. Leave empty for a top-level category.') ?></small>
             </div>
 
             <div class="form-group">
@@ -186,16 +236,18 @@ require_once __DIR__ . '/views/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($allCategories as $category): ?>
+                        <?php foreach ($categoryTree as $category): ?>
                             <tr>
                                 <td>
-                                    <a href="categories.php?edit=<?= (int) $category['id'] ?>" style="font-weight: 600; color: var(--text-main); text-decoration: none;">
-                                        <?= Security::sanitize((string) $category['name']) ?>
-                                    </a>
-                                    <div style="font-size: 11px; color: var(--text-muted);">/<?= Security::sanitize((string) $category['slug']) ?></div>
-                                    <?php if (!empty($category['description'])): ?>
-                                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;"><?= Security::sanitize((string) $category['description']) ?></div>
-                                    <?php endif; ?>
+                                    <div style="padding-left: <?= (int) $category['depth'] * 18 ?>px;">
+                                        <a href="categories.php?edit=<?= (int) $category['id'] ?>" style="font-weight: 600; color: var(--text-main); text-decoration: none;">
+                                            <?= Security::sanitize((string) $category['name']) ?>
+                                        </a>
+                                        <div style="font-size: 11px; color: var(--text-muted);">/<?= Security::sanitize((string) $category['slug']) ?></div>
+                                        <?php if (!empty($category['description'])): ?>
+                                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;"><?= Security::sanitize((string) $category['description']) ?></div>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td style="text-align: center;"><?= (int) ($category['post_count'] ?? 0) ?></td>
                                 <td>
@@ -216,4 +268,3 @@ require_once __DIR__ . '/views/header.php';
 </div>
 
 <?php require_once __DIR__ . '/views/footer.php'; ?>
-

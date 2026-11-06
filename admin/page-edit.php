@@ -32,6 +32,10 @@ if ($id > 0) {
     $stmt->execute([':id' => $id]);
     $existing = $stmt->fetch();
     if ($existing) {
+        if (!empty($existing['deleted_at'])) {
+            header('Location: ' . ($existing['type'] === 'post' ? 'posts.php?status=trash' : 'pages.php?status=trash'));
+            exit;
+        }
         if (!Auth::can('edit_others_pages') && (int)$existing['author_id'] !== (int)Auth::id()) {
             http_response_code(403);
             die('Access denied to this article.');
@@ -391,8 +395,8 @@ foreach ($allLangPages->fetchAll() as $p) {
     $lookupPages[(int)$p['id']] = $p;
 }
 
-// Categories available for assignment (flat list, shown for blog posts only).
-$allCategories = $db->query("SELECT id, name, slug FROM categories ORDER BY name ASC")->fetchAll();
+// Categories available for assignment (hierarchical, shown for blog posts only).
+$allCategories = class_exists('\Core\CategoryTree') ? \Core\CategoryTree::flatten(\Core\CategoryTree::all()) : $db->query("SELECT id, name, slug FROM categories ORDER BY name ASC")->fetchAll();
 
 function resolveParentPath(int $parentId, array $lookup): string {
     $slugs = [];
@@ -743,6 +747,11 @@ require_once __DIR__ . '/views/header.php';
         </p>
     </div>
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <?php if ($id > 0 && class_exists('\Core\Preview')): ?>
+            <a href="<?= htmlspecialchars(\Core\Preview::url($id), ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener" class="btn btn-secondary" title="<?= _e('Preview') ?>">
+                👁️ <?= _e('Preview') ?> &nearr;
+            </a>
+        <?php endif; ?>
         <?php if ($item['type'] === 'post'): ?>
             <a href="posts.php" class="btn btn-secondary">&larr; <?= _e('Posts') ?></a>
         <?php else: ?>
@@ -997,7 +1006,7 @@ require_once __DIR__ . '/views/header.php';
                         <input class="form-control" type="text" id="category-filter" placeholder="<?= _e('Filter categories...') ?>" style="margin-bottom: 8px; font-size: 12px;">
                         <div id="category-checkbox-list" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 8px); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; background: var(--bg-subtle);">
                             <?php foreach ($allCategories as $category): ?>
-                                <label class="category-option" style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; margin: 0;">
+                                <label class="category-option" style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; margin: 0; padding-left: <?= (int)($category['depth'] ?? 0) * 16 ?>px;">
                                     <input type="checkbox" name="categories[]" value="<?= (int) $category['id'] ?>" <?= in_array((int) $category['id'], $assignedCategoryIds, true) ? 'checked' : '' ?>>
                                     <span><?= Security::sanitize((string) $category['name']) ?></span>
                                 </label>
