@@ -2,7 +2,7 @@
 use Core\Hooks;
 ?>
             <footer style="margin-top: 40px; padding: 20px 0; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; gap: 8px;">
-                <span><strong>CMSbyPHP v1.0</strong> &bull; Lekki, szybki i niezależny CMS</span>
+                <span><strong>CMSbyPHP v<?= \Core\Version::CURRENT ?></strong> &bull; Lekki, szybki i niezależny CMS</span>
                 <span>Zalogowano jako: <strong><?= htmlspecialchars($_SESSION['user_name'] ?? 'czupryniak', ENT_QUOTES, 'UTF-8') ?></strong></span>
             </footer>
         </main>

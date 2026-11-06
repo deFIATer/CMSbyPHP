@@ -76,6 +76,90 @@ if (isset($_GET['delete']) && isset($_GET['csrf'])) {
     }
 }
 
+/**
+ * Auto-synchronize physical files in uploads/ and data/protected_files/ with media table
+ */
+function syncPhysicalMedia(\PDO $db): void {
+    $existing = $db->query("SELECT filepath FROM media")->fetchAll(\PDO::FETCH_COLUMN) ?: [];
+    $existingMap = [];
+    foreach ($existing as $p) {
+        $clean = ltrim($p, '/');
+        $existingMap[$clean] = true;
+        $existingMap['/' . $clean] = true;
+    }
+
+    $baseDir = dirname(__DIR__);
+    $candidates = [];
+
+    // 1. Scan uploads
+    $uploadsDir = $baseDir . '/uploads';
+    if (is_dir($uploadsDir)) {
+        foreach (scandir($uploadsDir) ?: [] as $file) {
+            if ($file === '.' || $file === '..' || $file === '.htaccess' || $file === 'cache' || is_dir($uploadsDir . '/' . $file)) {
+                continue;
+            }
+            $relPath = '/uploads/' . $file;
+            if (!isset($existingMap[$relPath])) {
+                $candidates[] = [
+                    'file' => $file,
+                    'path' => $relPath,
+                    'full' => $uploadsDir . '/' . $file,
+                    'private' => 0
+                ];
+            }
+        }
+    }
+
+    // 2. Scan data/protected_files
+    $protDir = $baseDir . '/data/protected_files';
+    if (is_dir($protDir)) {
+        foreach (scandir($protDir) ?: [] as $file) {
+            if ($file === '.' || $file === '..' || $file === '.htaccess' || is_dir($protDir . '/' . $file)) {
+                continue;
+            }
+            $relPath = '/data/protected_files/' . $file;
+            if (!isset($existingMap[$relPath])) {
+                $candidates[] = [
+                    'file' => $file,
+                    'path' => $relPath,
+                    'full' => $protDir . '/' . $file,
+                    'private' => 1
+                ];
+            }
+        }
+    }
+
+    if (!empty($candidates)) {
+        $insert = $db->prepare("
+            INSERT INTO media (filename, filepath, mime_type, file_size, webp_path, is_private, user_id, created_at)
+            VALUES (:f, :p, :m, :s, :w, :ip, 1, :c)
+        ");
+        foreach ($candidates as $c) {
+            $mime = 'application/octet-stream';
+            if (function_exists('finfo_open')) {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime = finfo_file($finfo, $c['full']) ?: 'application/octet-stream';
+                finfo_close($finfo);
+            }
+            $size = @filesize($c['full']) ?: 0;
+            $mtime = date('Y-m-d H:i:s', @filemtime($c['full']) ?: time());
+
+            $insert->execute([
+                ':f'  => $c['file'],
+                ':p'  => $c['path'],
+                ':m'  => $mime,
+                ':s'  => $size,
+                ':w'  => null,
+                ':ip' => $c['private'],
+                ':c'  => $mtime
+            ]);
+        }
+    }
+}
+
+// Ensure all physical assets on server are registered
+syncPhysicalMedia($db);
+
 // Fetch all uploaded assets from database
 $mediaItems = $db->query("
     SELECT m.*, u.username as uploader 

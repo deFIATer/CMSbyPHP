@@ -629,6 +629,10 @@ final class Setup {
         return is_file(self::rootPath() . '/data/cms.sqlite');
     }
 
+    public static function isApplicationInstalled(): bool {
+        return self::isInstalled();
+    }
+
     /**
      * Ready to paste nginx configuration: the equivalent of every shipped
      * .htaccess rule for servers that ignore .htaccess files.

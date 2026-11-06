@@ -16,86 +16,86 @@ final class SiteHealth
     {
         $rows = [];
 
-        $installed = Setup::isApplicationInstalled();
+        $installed = Setup::isInstalled();
         $rows[] = self::row(
             'installation',
-            _e('Installation completed'),
+            __('Installation completed'),
             $installed ? 'ok' : 'error',
-            $installed ? _e('The installation wizard has completed.') : _e('The installation wizard has not finished.'),
+            $installed ? __('The installation wizard has completed.') : __('The installation wizard has not finished.'),
             $installed ? '' : 'install.php'
         );
 
         $installerPresent = is_file(dirname(__DIR__) . '/install.php');
         $rows[] = self::row(
             'installer',
-            _e('Installer removed'),
+            __('Installer removed'),
             $installerPresent ? 'warning' : 'ok',
             $installerPresent
-                ? _e('install.php is still present. Delete or lock it after installation.')
-                : _e('install.php is not reachable.'),
+                ? __('install.php is still present. Delete or lock it after installation.')
+                : __('install.php is not reachable.'),
             ''
         );
 
         $writable = is_writable(dirname(__DIR__) . '/data') && is_writable(dirname(__DIR__) . '/uploads');
         $rows[] = self::row(
             'permissions',
-            _e('Writable data and uploads'),
+            __('Writable data and uploads'),
             $writable ? 'ok' : 'error',
-            $writable ? _e('The CMS can write to data/ and uploads/.') : _e('data/ or uploads/ is not writable by the web server user.'),
+            $writable ? __('The CMS can write to data/ and uploads/.') : __('data/ or uploads/ is not writable by the web server user.'),
             ''
         );
 
         $https = Config::requestIsHttps();
         $rows[] = self::row(
             'https',
-            _e('HTTPS'),
+            __('HTTPS'),
             $https ? 'ok' : 'warning',
-            $https ? _e('The site is served over HTTPS.') : _e('The site is currently served over HTTP.'),
+            $https ? __('The site is served over HTTPS.') : __('The site is currently served over HTTP.'),
             ''
         );
 
         $debug = Config::getBool('debug', false);
         $rows[] = self::row(
             'debug',
-            _e('Debug mode off'),
+            __('Debug mode off'),
             $debug ? 'warning' : 'ok',
-            $debug ? _e('Debug mode is enabled. Disable it on a production site.') : _e('Debug output is disabled.'),
+            $debug ? __('Debug mode is enabled. Disable it on a production site.') : __('Debug output is disabled.'),
             ''
         );
 
         $headers = Router::getOption('security_headers_enabled', '1') === '1';
         $rows[] = self::row(
             'headers',
-            _e('Security headers'),
+            __('Security headers'),
             $headers ? 'ok' : 'warning',
-            $headers ? _e('Security headers and CSP are enabled.') : _e('Security headers are disabled.'),
+            $headers ? __('Security headers and CSP are enabled.') : __('Security headers are disabled.'),
             'settings.php?tab=security'
         );
 
         $cache = PageCache::isEnabled();
         $rows[] = self::row(
             'cache',
-            _e('Page cache'),
+            __('Page cache'),
             $cache ? 'ok' : 'info',
-            $cache ? _e('Anonymous pages can be served from the cache.') : _e('The page cache is disabled.'),
+            $cache ? __('Anonymous pages can be served from the cache.') : __('The page cache is disabled.'),
             'settings.php?tab=performance'
         );
 
         $backups = Backup::listBackups();
         $rows[] = self::row(
             'backups',
-            _e('Recent backup'),
+            __('Recent backup'),
             $backups === [] ? 'warning' : 'ok',
-            $backups === [] ? _e('No backup has been created yet.') : sprintf(_e('%d backup(s) available.'), count($backups)),
+            $backups === [] ? __('No backup has been created yet.') : sprintf(__('%d backup(s) available.'), count($backups)),
             'backup.php'
         );
 
         $phpOk = version_compare(PHP_VERSION, '8.1.0', '>=');
         $rows[] = self::row(
             'php',
-            _e('PHP version'),
+            __('PHP version'),
             $phpOk ? 'ok' : 'warning',
-            sprintf(_e('Running PHP %s. PHP 8.2+ is recommended.'), PHP_VERSION),
+            sprintf(__('Running PHP %s. PHP 8.2+ is recommended.'), PHP_VERSION),
             ''
         );
 
@@ -107,9 +107,9 @@ final class SiteHealth
         }
         $rows[] = self::row(
             'password',
-            _e('Administrator password'),
+            __('Administrator password'),
             $defaultPassword ? 'error' : 'ok',
-            $defaultPassword ? _e('The legacy default administrator password is still in use.') : _e('The administrator password is not the legacy default.'),
+            $defaultPassword ? __('The legacy default administrator password is still in use.') : __('The administrator password is not the legacy default.'),
             'profile.php'
         );
 

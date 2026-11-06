@@ -107,7 +107,7 @@ unset($_SESSION['admin_theme_reset']);
             <img src="assets/img/cmsbyphp-icon-64.png" alt="CMSbyPHP" class="brand-badge" style="width:36px; height:36px; border-radius:10px; object-fit:contain; flex-shrink:0;">
             <div style="display:flex; flex-direction:column; min-width:0;">
                 <span class="brand-name" style="font-weight:800; font-size:16px; letter-spacing:-0.02em; color:var(--text-sidebar-bright, #fff);">CMSbyPHP</span>
-                <span style="font-size:11px; color:#94a3b8; font-weight:600;">v1.0 &bull; <?= _e('Personal Blog') ?></span>
+                <span style="font-size:11px; color:#94a3b8; font-weight:600;">v<?= \Core\Version::CURRENT ?> &bull; <?= _e('Personal Blog') ?></span>
             </div>
             <button type="button" id="mobile-sidebar-close" class="mobile-sidebar-close-btn" aria-label="<?= _e('Close menu') ?>" style="margin-left: auto; background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 4px 8px; line-height: 1;">&times;</button>
         </div>

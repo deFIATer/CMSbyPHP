@@ -18,7 +18,7 @@ namespace Core;
  */
 final class Updater
 {
-    public const VERSION = '1.0.0';
+    public const VERSION = Version::CURRENT;
     public const GITHUB_REPO = 'deFIATer/CMSbyPHP';
     public const API_BASE = 'https://api.github.com/repos/deFIATer/CMSbyPHP';
 

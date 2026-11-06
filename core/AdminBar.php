@@ -179,10 +179,10 @@ html.admin-bar-collapsed #wp-admin-bar-expand { display: inline-flex !important;
         $canSettings = Auth::can('manage_settings');
 
         $editUrl = '';
-        $editLabel = _e('Edit');
+        $editLabel = __('Edit');
         if ($canPages && is_array($currentPage) && !empty($currentPage['id'])) {
             $isPost = (($currentPage['type'] ?? 'post') === 'post');
-            $editLabel = $isPost ? _e('Edit Post') : _e('Edit Page');
+            $editLabel = $isPost ? __('Edit Post') : __('Edit Page');
             $editUrl = self::adminUrl('page-edit.php?id=' . (int)$currentPage['id']);
         }
 
@@ -193,7 +193,7 @@ html.admin-bar-collapsed #wp-admin-bar-expand { display: inline-flex !important;
 
         $siteTitle = Router::getOption('site_title', 'CMSbyPHP');
         ?>
-<div id="wp-admin-bar" role="navigation" aria-label="<?= _e('Admin toolbar') ?>">
+<div id="wp-admin-bar" role="navigation" aria-label="<?= __('Admin toolbar') ?>">
     <div class="ab-left">
         <!-- Logo / Brand link -->
         <div class="ab-item">

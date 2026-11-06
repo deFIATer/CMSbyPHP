@@ -189,6 +189,19 @@ if (move_uploaded_file($file['tmp_name'], $uploadDir . $safeName)) {
 
     // Record media entry in database
     $db = Database::getConnection();
+
+    // Safe user ID resolution to ensure foreign key constraint passes
+    $uploaderId = Auth::id();
+    if ($uploaderId <= 0) {
+        $uploaderId = null;
+    } else {
+        $checkUser = $db->prepare("SELECT id FROM users WHERE id = :uid LIMIT 1");
+        $checkUser->execute([':uid' => $uploaderId]);
+        if (!$checkUser->fetchColumn()) {
+            $uploaderId = null;
+        }
+    }
+
     $stmt = $db->prepare("
         INSERT INTO media (filename, filepath, mime_type, file_size, webp_path, is_private, password_hash, access_token, user_id) 
         VALUES (:f, :p, :m, :s, :w, :ip, :ph, :at, :u)
@@ -202,7 +215,7 @@ if (move_uploaded_file($file['tmp_name'], $uploadDir . $safeName)) {
         ':ip' => $isPrivateUpload ? 1 : 0,
         ':ph' => $passwordHash,
         ':at' => $accessToken,
-        ':u'  => Auth::id()
+        ':u'  => $uploaderId
     ]);
 
     $newId = (int)$db->lastInsertId();

@@ -120,7 +120,7 @@ $healthOk = count($healthRows) - count($healthIssues);
     <div>
         <div style="display: flex; align-items: center; gap: 8px;">
             <h1 class="page-title" style="margin-bottom: 2px;">Pulpit CMSbyPHP</h1>
-            <span class="badge" style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-weight: 700; font-size: 11px;">v1.0 LTS</span>
+            <span class="badge" style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-weight: 700; font-size: 11px;">v<?= \Core\Version::CURRENT ?></span>
         </div>
         <p style="color: var(--text-muted); font-size: 13px;">Witaj, <?= htmlspecialchars($_SESSION['user_name'] ?? 'czupryniak', ENT_QUOTES, 'UTF-8') ?>! Podsumowanie aktywności Twojego bloga i stan systemu.</p>
     </div>
@@ -338,7 +338,7 @@ $healthOk = count($healthRows) - count($healthIssues);
             <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-main);">Stan systemu CMSbyPHP</h3>
             <ul style="list-style: none; font-size: 13px; display: flex; flex-direction: column; gap: 10px; color: var(--text-muted); padding: 0; margin: 0;">
                 <li style="display: flex; justify-content: space-between;">
-                    <span>Wersja CMS:</span> <strong style="color: var(--primary);">CMSbyPHP 1.0 LTS</strong>
+                    <span>Wersja CMS:</span> <strong style="color: var(--primary);">CMSbyPHP v<?= \Core\Version::CURRENT ?></strong>
                 </li>
                 <li style="display: flex; justify-content: space-between;">
                     <span>Wersja PHP:</span> <strong style="color: var(--text-main);"><?= PHP_VERSION ?></strong>
