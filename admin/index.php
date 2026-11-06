@@ -143,7 +143,7 @@ $healthOk = count($healthRows) - count($healthIssues);
         <div>
             <h2 style="font-size: 15px; font-weight: 700; margin: 0 0 4px; color: var(--text-main);"><?= _e('Site Health') ?></h2>
             <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
-                <?= sprintf(_e('%d of %d checks are healthy.'), $healthOk, count($healthRows)) ?>
+                <?= sprintf(__('%d of %d checks are healthy.'), $healthOk, count($healthRows)) ?>
             </p>
         </div>
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -170,7 +170,7 @@ $healthOk = count($healthRows) - count($healthIssues);
             <?php endforeach; ?>
         </div>
         <?php if (count($healthIssues) > 4): ?>
-            <p style="font-size: 11px; color: var(--text-muted); margin: 10px 0 0;"><?= sprintf(_e('%d more check(s) need attention.'), count($healthIssues) - 4) ?></p>
+            <p style="font-size: 11px; color: var(--text-muted); margin: 10px 0 0;"><?= sprintf(__('%d more check(s) need attention.'), count($healthIssues) - 4) ?></p>
         <?php endif; ?>
     <?php endif; ?>
 </div>
