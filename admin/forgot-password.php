@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = __('Passwords do not match.');
         } else {
             $hash = password_hash($newPass, PASSWORD_DEFAULT);
-            $stmt = $db->prepare("UPDATE users SET password = :pwd, reset_token = NULL, reset_expires = NULL WHERE id = :uid");
+            $stmt = $db->prepare("UPDATE users SET password_hash = :pwd, reset_token = NULL, reset_expires = NULL WHERE id = :uid");
             $stmt->execute([
                 ':pwd' => $hash,
                 ':uid' => $user['id']
