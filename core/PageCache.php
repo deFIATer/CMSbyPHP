@@ -60,7 +60,7 @@ final class PageCache
 
         $uri = $_SERVER['REQUEST_URI'] ?? '/';
         $path = parse_url($uri, PHP_URL_PATH) ?: '/';
-        if (str_contains($path, '/admin') || str_ends_with($path, 'sitemap.xml') || str_ends_with($path, 'robots.txt')) {
+        if (str_contains($path, '/admin') || str_starts_with($path, '/file/') || str_ends_with($path, 'sitemap.xml') || str_ends_with($path, 'robots.txt')) {
             return false;
         }
 
